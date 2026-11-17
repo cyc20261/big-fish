@@ -131,6 +131,25 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:400;background:rgba(0,0,0,.78);color:#fff;padding:8px 18px;border-radius:18px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:1}
 
+/* install banner */
+.install-bar{position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(135deg,#1a3a5c,#0d2438);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));font-size:13px;transform:translateY(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 12px rgba(0,0,0,.35)}
+.install-bar.show{transform:translateY(0)}
+.install-bar .ib-text{flex:1;line-height:1.35}
+.install-bar .ib-text b{font-size:14px}
+.install-bar button{flex-shrink:0;border:none;border-radius:14px;padding:7px 15px;font-size:13px;font-weight:600;cursor:pointer;background:#4da3ff;color:#fff}
+.install-bar .ib-close{background:none;color:rgba(255,255,255,.6);font-size:22px;padding:0 4px;line-height:1}
+
+/* iOS guide overlay */
+.ios-guide{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.72);align-items:center;justify-content:center}
+.ios-guide.show{display:flex}
+.ios-guide .ios-card{background:#fff;border-radius:16px;padding:22px 20px 18px;max-width:320px;width:90%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.ios-guide .ios-card h4{font-size:17px;color:#111;margin-bottom:6px}
+.ios-guide .ios-card p{font-size:13px;color:#666;line-height:1.6;margin-bottom:14px}
+.ios-guide .ios-card .ios-steps{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
+.ios-guide .ios-card .ios-steps span{background:#f2f4f7;border-radius:10px;padding:8px 12px;font-size:13px;color:#333;font-weight:600}
+.ios-guide .ios-card .ios-steps .ios-arr{font-size:16px;color:#aaa}
+.ios-guide .ios-card button{width:100%;padding:11px;border:none;border-radius:10px;background:linear-gradient(180deg,#4da3ff,#2b7fff);color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+
 .bubbles-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .fbub{position:absolute;border-radius:50%;animation:floatUp linear infinite}
 @keyframes floatUp{0%{bottom:-40px;opacity:0}12%{opacity:.3}70%{opacity:.12}100%{bottom:110%;opacity:0}}
@@ -186,6 +205,25 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
 
 <div class="toast" id="toast"></div>
 
+<!-- install bar (Android) -->
+<div class="install-bar" id="installBar">
+  <div class="ib-text"><b>🐟 添加到桌面</b><br>像原生 App 一样快速打开</div>
+  <button id="installBtn" onclick="installApp()">安装</button>
+  <button class="ib-close" onclick="dismissInstall()">×</button>
+</div>
+
+<!-- iOS guide -->
+<div class="ios-guide" id="iosGuide">
+  <div class="ios-card">
+    <h4>📱 添加到主屏幕</h4>
+    <p>在 Safari 浏览器中打开，按下面步骤操作：</p>
+    <div class="ios-steps">
+      <span>📤 分享</span><span class="ios-arr">→</span><span>🏠 添加到主屏幕</span>
+    </div>
+    <button onclick="document.getElementById('iosGuide').classList.remove('show')">知道啦</button>
+  </div>
+</div>
+
 <!-- settings sheet -->
 <div class="sheet-bg" id="sheetBg" onclick="if(event.target===this)closeSheet()">
   <div class="sheet">
@@ -209,6 +247,13 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
 
       <label>界面配色</label>
       <div class="accent-row" id="accentRow"></div>
+
+      <label>添加到桌面</label>
+      <div style="display:flex;gap:8px" id="installRow">
+        <button id="sheetInstallBtn" onclick="installApp()" style="flex:1;padding:9px;border:none;border-radius:8px;background:#4da3ff;color:#fff;font-size:13px;font-weight:600;cursor:pointer">安装到桌面 (Android)</button>
+        <button onclick="document.getElementById('iosGuide').classList.add('show')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#ececec;color:#555;font-size:13px;font-weight:600;cursor:pointer">iPhone 查看教程</button>
+      </div>
+      <div class="tip" id="installTip">添加后像原生 App 一样快速打开</div>
 
       <label>DeepSeek API Key</label>
       <input type="password" id="setKey" placeholder="sk-..." autocomplete="off">
@@ -524,6 +569,31 @@ function setupSkip(){
 })();
 
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}
+
+/* ═════════ PWA install ═════════ */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  const bar=document.getElementById('installBar');
+  if(bar&&!S.get('install_dismissed',false))bar.classList.add('show');
+});
+function installApp(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted'){document.getElementById('installBar').classList.remove('show');showToast('正在安装到桌面～')}
+    else showToast('下次想安装时点 ⋯ 设置哦');
+  });deferredPrompt=null}else showToast('请在 Chrome 菜单中选择「添加到主屏幕」')
+}
+function dismissInstall(){
+  document.getElementById('installBar').classList.remove('show');
+  S.set('install_dismissed',true);
+}
+
+/* iOS detection */
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+const isStandalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+if(isIOS&&!isStandalone&&!S.get('ios_guide_shown',false)){
+  setTimeout(()=>{document.getElementById('iosGuide').classList.add('show');S.set('ios_guide_shown',true)},2000);
+}
 </script>
 </body>
 </html>
