@@ -293,7 +293,14 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
       <label>备注（显示在聊天顶部的名字）</label>
       <input type="text" id="setRemark" placeholder="大肥鱼">
 
-      <label>头像</label>
+      <label>你的头像（点击更换）</label>
+      <div style="display:flex;align-items:center;gap:12px" onclick="document.getElementById('avatarFile').click()" id="myAvatarWrap">
+        <div id="myAvatarPreview" style="width:52px;height:52px;border-radius:50%;font-size:28px;display:flex;align-items:center;justify-content:center;background:#e8ecf0;cursor:pointer">😎</div>
+        <span style="font-size:12px;color:#4da3ff;cursor:pointer">点击上传自定义头像</span>
+      </div>
+      <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
+
+      <label>大肥鱼的头像</label>
       <div style="display:flex;align-items:center;gap:12px">
         <img src="avatar.jpg" style="width:52px;height:52px;border-radius:8px;object-fit:cover">
         <div style="font-size:12px;color:#8a8a8a;line-height:1.5">当前使用鲸鱼娘立绘<br>（修改图片请替换 avatar.jpg）</div>
@@ -553,8 +560,10 @@ function addMsg(who,text,ts,scroll,sticker){
     const img=document.createElement('img');img.src=sticker;img.loading='lazy';
     bubble.appendChild(img);
     if(who==='user'){
-      row.innerHTML='<div class="ava user">😎</div>';
+      row.innerHTML='<div class="ava user" style="font-size:20px">😎</div>';
       row.appendChild(bubble);
+      const a=row.querySelector('.ava.user');
+      if(a)applyMyAvatar(a);
     }else{
       row.innerHTML='<div class="ava"><img src="avatar.jpg" alt=""></div>';
       row.appendChild(bubble);
@@ -563,8 +572,10 @@ function addMsg(who,text,ts,scroll,sticker){
     const bubble=document.createElement('div');
     bubble.className='bubble';bubble.textContent=text;
     if(who==='user'){
-      row.innerHTML='<div class="ava user">😎</div>';
+      row.innerHTML='<div class="ava user" style="font-size:20px">😎</div>';
       row.appendChild(bubble);
+      const a=row.querySelector('.ava.user');
+      if(a)applyMyAvatar(a);
     }else{
       row.innerHTML='<div class="ava"><img src="avatar.jpg" alt=""></div>';
       row.appendChild(bubble);
@@ -690,6 +701,7 @@ function openSheet(){
   document.getElementById('tempVal').textContent=t;
   document.getElementById('setModel').value=S.get('model','deepseek-chat');
   buildPickers();
+  refreshAvatarPreview();
   document.getElementById('sheetBg').classList.add('show');
 }
 function closeSheet(){document.getElementById('sheetBg').classList.remove('show')}
@@ -905,6 +917,55 @@ function dismissInstall(){
 /* iOS guide */
 if(isIOS&&!isStandalone){
   setTimeout(()=>{document.getElementById('iosGuide').classList.add('show')},2500);
+}
+
+/* ═════════ custom avatar ═════════ */
+function handleAvatarUpload(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  if(file.size>2*1024*1024){showToast('头像文件太大了，请用 2MB 以内的图片');return}
+  const reader=new FileReader();
+  reader.onload=function(){
+    const b64=reader.result;
+    try{localStorage['fish_myAvatar']=b64}catch(ex){showToast('头像太大了，换张小一点的吧');return}
+    document.getElementById('myAvatarPreview').style.backgroundImage='url('+b64+')';
+    document.getElementById('myAvatarPreview').style.backgroundSize='cover';
+    document.getElementById('myAvatarPreview').textContent='';
+    /* update existing user avatars in chat */
+    document.querySelectorAll('.ava.user').forEach(a=>{
+      a.style.backgroundImage='url('+b64+')';
+      a.style.backgroundSize='cover';
+      a.textContent='';
+    });
+    showToast('头像已保存');
+  };
+  reader.readAsDataURL(file);
+}
+function loadMyAvatar(){
+  const b64=localStorage['fish_myAvatar'];
+  if(!b64)return null;
+  return b64;
+}
+function applyMyAvatar(el){
+  const b64=loadMyAvatar();
+  if(b64){
+    el.style.backgroundImage='url('+b64+')';
+    el.style.backgroundSize='cover';
+    el.textContent='';
+  }
+}
+function refreshAvatarPreview(){
+  const b64=loadMyAvatar();
+  const preview=document.getElementById('myAvatarPreview');
+  if(!preview)return;
+  if(b64){
+    preview.style.backgroundImage='url('+b64+')';
+    preview.style.backgroundSize='cover';
+    preview.textContent='';
+  }else{
+    preview.style.backgroundImage='';
+    preview.textContent='😎';
+  }
 }
 </script>
 </body>
