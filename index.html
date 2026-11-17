@@ -175,6 +175,12 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
 .emoji-grid{flex:1;overflow-y:auto;padding:8px 12px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-content:start}
 .emoji-grid .em{font-size:28px;padding:6px 0;text-align:center;cursor:pointer;border-radius:6px;user-select:none;line-height:1}
 .emoji-grid .em:active{background:rgba(43,127,255,.12)}
+/* sticker bar */
+.sticker-bar{display:none;padding:6px 8px;gap:8px;overflow-x:auto;white-space:nowrap;background:rgba(247,247,247,.88);}
+.sticker-bar.show{display:flex}
+.sb-sticker{flex-shrink:0;width:64px;height:64px;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;position:relative;overflow:hidden}
+.sb-sticker:active{transform:scale(.92);opacity:.8}
+.sb-sticker .sb-label{position:absolute;bottom:0;left:0;right:0;padding:2px 4px;font-size:8px;text-align:center;color:#fff;background:rgba(0,0,0,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* sticker bubble */
 .bubble.sticker{background:transparent!important;padding:0!important;box-shadow:none!important;max-width:180px}
 .bubble.sticker img{width:100%;border-radius:10px;display:block;max-height:240px;object-fit:contain}
@@ -223,9 +229,14 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
   <div class="typing-bubble"><span></span><span></span><span></span></div>
 </div>
 
+<!-- sticker quick bar -->
+<div class="sticker-bar" id="stickerBar">
+</div>
+
 <!-- input bar -->
 <div class="bar">
   <button class="bar-btn" onclick="toggleEmoji()">☺</button>
+  <button class="bar-btn" onclick="toggleStickerBar()" id="stickerBtn">🖼</button>
   <textarea class="bar-input" id="inputBox" rows="1" placeholder="发消息…"
     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
   <button class="send-btn" id="sendBtn" onclick="send()">↑</button>
@@ -492,8 +503,30 @@ function sendStickerReply(){
 }
 function toggleEmoji(){
   const p=document.getElementById('emojiPanel');
+  const sb=document.getElementById('stickerBar');
+  if(sb.classList.contains('show')) sb.classList.remove('show');
   if(p.classList.contains('show')){p.classList.remove('show');return}
   switchEmojiTab(emojiTab);p.classList.add('show');
+}
+function toggleStickerBar(){
+  const sb=document.getElementById('stickerBar');
+  const ep=document.getElementById('emojiPanel');
+  ep.classList.remove('show');
+  if(sb.classList.contains('show')){sb.classList.remove('show');return}
+  /* fill if empty */
+  if(!sb.children.length){
+    STICKERS.forEach(([src,label])=>{
+      const d=document.createElement('div');
+      d.className='sb-sticker';
+      d.style.backgroundImage='url('+src+')';
+      d.title=label;
+      const lbl=document.createElement('span');lbl.className='sb-label';lbl.textContent=label;
+      d.appendChild(lbl);
+      d.onclick=()=>sendSticker(src);
+      sb.appendChild(d);
+    });
+  }
+  sb.classList.add('show');
 }
 /* close emoji panel on outside tap */
 document.addEventListener('click',function(e){
