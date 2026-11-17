@@ -435,26 +435,87 @@ const STICKERS=[
   ['img/w_logo.jpg','鲸鱼娘标志']
 ];
 
+/* ═════════ canvas sticker packs (square emoji stickers) ═════════ */
+const STICKER_PACKS=[
+  {name:'开心',items:[['😄','嘻嘻'],['😂','笑死'],['🤣','笑喷'],['😆','哈哈哈'],['🥰','喜欢'],['😍','心动'],['😘','亲亲'],['🤩','星星眼'],['🥳','庆祝'],['😎','酷']]},
+  {name:'卖萌',items:[['🥺','委屈'],['😋','略略略'],['😜','略'],['🤪','傻'],['😝','略'],['🤭','偷笑'],['😊','害羞'],['🥹','泪目'],['🫣','偷看'],['😇','天使']]},
+  {name:'无语',items:[['😅','汗'],['🤔','思考'],['😐','冷漠'],['🙄','翻白眼'],['😑','无语'],['🤨','挑眉'],['😒','不屑'],['🫠','熔化'],['😮‍💨','叹气'],['💀','死了'],['😴','睡觉'],['🤯','爆炸']]},
+  {name:'生气',items:[['😤','哼'],['😡','生气'],['🤬','骂'],['💢','怒火'],['😠','怒'],['👿','恶魔'],['💩','大便'],['🙃','呵呵'],['😾','猫怒'],['🗿','石像']]},
+  {name:'爱心',items:[['❤️','爱心'],['🩷','粉心'],['🧡','橙心'],['💛','黄心'],['💚','绿心'],['💙','蓝心'],['💜','紫心'],['💗','心跳'],['💖','闪心'],['💘','中箭'],['💝','礼物心'],['🫶','手比心'],['💋','亲亲'],['🌹','玫瑰']]},
+  {name:'干饭',items:[['🍕','披萨'],['🍔','汉堡'],['🍟','薯条'],['🌭','热狗'],['🍿','爆米花'],['🧁','杯子蛋糕'],['🍰','蛋糕'],['🍩','甜甜圈'],['🍪','饼干'],['🍫','巧克力'],['🍬','糖'],['🍉','西瓜'],['🍓','草莓'],['🍑','桃子'],['🧋','奶茶'],['☕','咖啡'],['🍺','啤酒'],['🧊','冰块']]}
+];
+
+function makeStickerCanvas(emoji,label){
+  const s=200,pad=16; /* square canvas */
+  const c=document.createElement('canvas');c.width=c.height=s;
+  const ctx=c.getContext('2d');
+  /* gradient bg */
+  const grd=ctx.createLinearGradient(0,0,s,s);
+  const hues=[
+    [220,260],[260,300],[300,340],[340,20],[20,60],[60,100],[100,160],[160,220],
+    [10,50],[180,220],[280,320],[350,30],[40,80],[130,170],[200,240]
+  ][Math.floor(Math.random()*15)];
+  grd.addColorStop(0,'hsl('+hues[0]+',70%,88%)');
+  grd.addColorStop(1,'hsl('+hues[1]+',80%,78%)');
+  ctx.fillStyle=grd;
+  ctx.beginPath();ctx.roundRect(0,0,s,s,22);ctx.fill();
+  /* emoji */
+  ctx.font='84px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(emoji,s/2,s/2-12);
+  /* label */
+  if(label){
+    ctx.font='bold 20px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.fillText(label,s/2,s-18);
+  }
+  return c.toDataURL('image/png');
+}
+
+/* lazy cache */
+const _stickerCache={};
+function getStickerData(emoji,label){
+  const k=emoji+'|'+(label||'');
+  if(!_stickerCache[k])_stickerCache[k]=makeStickerCanvas(emoji,label);
+  return _stickerCache[k];
+}
+
 let emojiTab=0;
+let stickerPackIdx=0;
 function switchEmojiTab(n){
   emojiTab=n;
   document.querySelectorAll('.emoji-tab').forEach((t,i)=>t.classList.toggle('on',i===n));
   const grid=document.getElementById('emojiGrid');
   if(n<4){
+    grid.style.gridTemplateColumns='repeat(7,1fr)';
     grid.innerHTML='';
     EMOJIS[n].forEach(e=>{const s=document.createElement('span');s.className='em';s.textContent=e;s.onclick=()=>insertEmoji(e);grid.appendChild(s)});
   }else{
+    grid.style.gridTemplateColumns='';
     grid.innerHTML='';
-    grid.style.gridTemplateColumns='repeat(3,1fr)';
-    STICKERS.forEach(([src,label])=>{
+    /* pack nav */
+    const nav=document.createElement('div');
+    nav.style.cssText='grid-column:1/-1;display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;flex-shrink:0';
+    STICKER_PACKS.forEach((p,i)=>{
+      const b=document.createElement('button');
+      b.textContent=p.name;
+      b.style.cssText='flex-shrink:0;padding:4px 12px;border:none;border-radius:14px;font-size:13px;cursor:pointer;background:'+(i===stickerPackIdx?'#4da3ff':'#e8ecf0')+';color:'+(i===stickerPackIdx?'#fff':'#555')+';font-weight:600;white-space:nowrap';
+      b.onclick=(ev)=>{ev.stopPropagation();stickerPackIdx=i;switchEmojiTab(4)};
+      nav.appendChild(b);
+    });
+    grid.appendChild(nav);
+    /* sticker grid */
+    const sg=document.createElement('div');
+    sg.style.cssText='grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px';
+    STICKER_PACKS[stickerPackIdx].items.forEach(([emoji,label])=>{
       const d=document.createElement('div');
-      d.style.cssText='aspect-ratio:1;border-radius:10px;background:url('+src+') center/cover;cursor:pointer;margin:4px;position:relative';
+      const src=getStickerData(emoji,label);
+      d.style.cssText='aspect-ratio:1;border-radius:12px;background:url('+src+') center/cover;cursor:pointer;transition:.15s';
       d.title=label;
       d.onclick=()=>sendSticker(src);
-      const lbl=document.createElement('span');
-      lbl.style.cssText='position:absolute;bottom:0;left:0;right:0;padding:3px 4px;font-size:9px;text-align:center;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6));border-radius:0 0 10px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-      lbl.textContent=label;d.appendChild(lbl);grid.appendChild(d);
+      sg.appendChild(d);
     });
+    grid.appendChild(sg);
   }
 }
 function insertEmoji(e){
@@ -531,6 +592,15 @@ function toggleStickerBar(){
       d.appendChild(lbl);
       d.onclick=()=>sendSticker(src);
       sb.appendChild(d);
+    });
+    /* add generated emoji stickers */
+    const picks=[['😄','嘻嘻'],['😂','笑死'],['🥺','委屈'],['😤','哼'],['❤️','爱心'],['🎉','庆祝'],['😴','睡了'],['💀','死了']];
+    picks.forEach(([emoji,label])=>{
+      const src=getStickerData(emoji,label);
+      const d=document.createElement('div');d.className='sb-sticker';
+      d.style.backgroundImage='url('+src+')';d.title=label;
+      const lbl=document.createElement('span');lbl.className='sb-label';lbl.textContent=label;
+      d.appendChild(lbl);d.onclick=()=>sendSticker(src);sb.appendChild(d);
     });
   }
   sb.classList.add('show');
