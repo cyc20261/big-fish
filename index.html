@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>大肥鱼</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="大肥鱼">
+<meta name="theme-color" content="#00acc1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🐟</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%2300808f'/><text y='130' font-size='100' text-anchor='middle' x='96'>🐟</text></svg>">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#e0f7fa 0%,#b2ebf2 30%,#4dd0e1 70%,#00acc1 100%);display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent;user-select:none}
+.header{background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(0,172,193,.2);z-index:10;flex-shrink:0}
+.fish-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#ff9800,#ff5722);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px rgba(255,87,34,.4);animation:swim 2s ease-in-out infinite;flex-shrink:0}
+@keyframes swim{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.header-info h2{font-size:17px;color:#006064;line-height:1.2}
+.header-info p{font-size:11px;color:#00838f}
+.header-right{margin-left:auto;display:flex;gap:6px}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,172,193,.2);background:rgba(255,255,255,.6);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.icon-btn:active{background:rgba(0,172,193,.2);transform:scale(.92)}
+.chat-area{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.chat-area::-webkit-scrollbar{width:0}
+.msg{display:flex;gap:8px;max-width:88%;animation:msgIn .25s ease-out}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.fish{align-self:flex-start}
+.msg .avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.msg.fish .avatar{background:linear-gradient(135deg,#ff9800,#ff5722)}
+.msg.user .avatar{background:linear-gradient(135deg,#26c6da,#00bcd4)}
+.msg .bubble{padding:10px 14px;border-radius:16px;font-size:15px;line-height:1.6;word-break:break-word}
+.msg.user .bubble{background:linear-gradient(135deg,#006064,#00838f);color:#fff;border-bottom-right-radius:4px}
+.msg.fish .bubble{background:rgba(255,255,255,.92);color:#37474f;border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.typing{display:none;padding:10px 16px;align-self:flex-start}
+.typing.show{display:flex}
+.typing .dots{display:flex;gap:4px}
+.typing .dots span{width:7px;height:7px;border-radius:50%;background:#00acc1;animation:bounce 1.4s ease-in-out infinite}
+.typing .dots span:nth-child(2){animation-delay:.2s}
+.typing .dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1);opacity:1}}
+.input-bar{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:8px 10px;display:flex;gap:6px;align-items:flex-end;border-top:1px solid rgba(0,172,193,.15);flex-shrink:0;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.input-bar textarea{flex:1;border:none;border-radius:18px;padding:10px 14px;font-size:15px;resize:none;outline:none;background:#e0f7fa;max-height:80px;line-height:1.4;font-family:inherit}
+.input-bar textarea::placeholder{color:#80deea}
+.send-btn{width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,#00acc1,#00838f);color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,131,143,.35);transition:transform .15s}
+.send-btn:active{transform:scale(.88)}
+.send-btn:disabled{opacity:.45;pointer-events:none}
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-end;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:#fff;width:100%;max-width:480px;max-height:85vh;border-radius:20px 20px 0 0;padding:0;overflow:hidden;animation:slideUp .28s ease-out}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-header{padding:16px 18px 12px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:18px;color:#006064}
+.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:#f5f5f5;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:16px 18px;overflow-y:auto;max-height:calc(85vh - 70px)}
+.modal-body label{display:block;font-size:13px;color:#546e7a;margin:10px 0 4px;font-weight:600}
+.modal-body input,.modal-body textarea,.modal-body select{width:100%;border:1px solid #b2dfdb;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:#fafafa;transition:border-color .15s}
+.modal-body input:focus,.modal-body textarea:focus{border-color:#00acc1;background:#fff}
+.modal-body textarea{height:150px;resize:vertical;font-size:13px;line-height:1.5}
+.modal-body .hint{font-size:11px;color:#999;margin-top:2px}
+.modal-body .range-row{display:flex;align-items:center;gap:8px}
+.modal-body .range-row input[type=range]{flex:1}
+.modal-body .range-row span{font-size:13px;color:#00838f;font-weight:600;min-width:28px;text-align:center}
+.modal-footer{padding:12px 18px;border-top:1px solid #eee;display:flex;gap:8px}
+.modal-footer button{flex:1;padding:10px;border-radius:18px;border:none;font-size:15px;cursor:pointer;font-weight:600}
+.btn-primary{background:linear-gradient(135deg,#00acc1,#00838f);color:#fff}
+.btn-secondary{background:#e8e8e8;color:#666}
+.btn-danger{background:#ffcdd2;color:#c62828}
+/* Toast */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:200;background:rgba(0,0,0,.78);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap}
+.toast.show{opacity:1}
+/* Setup screen */
+.setup-screen{position:fixed;inset:0;background:linear-gradient(180deg,#e0f7fa,#00acc1);z-index:300;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;gap:16px}
+.setup-screen.hidden{display:none}
+.setup-card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.12)}
+.setup-card h2{font-size:22px;color:#006064;margin-bottom:4px}
+.setup-card p{font-size:13px;color:#78909c;margin-bottom:16px}
+.setup-card label{font-size:13px;color:#546e7a;font-weight:600;display:block;margin-bottom:4px}
+.setup-card input{width:100%;border:1px solid #b2dfdb;border-radius:10px;padding:10px 12px;font-size:14px;outline:none;margin-bottom:12px}
+.setup-card input:focus{border-color:#00acc1}
+.setup-card button{width:100%;padding:12px;border-radius:20px;border:none;background:linear-gradient(135deg,#00acc1,#00838f);color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+.setup-card .skip{background:none;color:#999;font-size:13px;margin-top:8px;font-weight:400;text-decoration:underline}
+/* Bubbles */
+.bubbles-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bub{position:absolute;background:rgba(255,255,255,.25);border-radius:50%;animation:float linear infinite}
+@keyframes float{0%{bottom:-50px;opacity:0}15%{opacity:.4}85%{opacity:.2}100%{bottom:110%;opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="bubbles-bg" id="bubblesBg"></div>
+
+<!-- First-time setup -->
+<div class="setup-screen" id="setupScreen">
+  <div style="font-size:64px">🐟</div>
+  <div class="setup-card">
+    <h2>欢迎来到大肥鱼 🐟</h2>
+    <p>请输入 DeepSeek API Key 来唤醒鱼鱼～<br><span style="font-size:11px;color:#bbb">（Key 只存在你浏览器里，不会上传）</span></p>
+    <label>DeepSeek API Key</label>
+    <input type="password" id="setupKey" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+    <button onclick="setupDone()">🐟 唤醒大肥鱼</button>
+    <button class="skip" onclick="setupSkip()">我先看看，等下再填</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="fish-avatar">🐟</div>
+  <div class="header-info">
+    <h2 id="fishName">大肥鱼</h2>
+    <p id="fishStatus">在线 · 池塘里咕噜咕噜～</p>
+  </div>
+  <div class="header-right">
+    <button class="icon-btn" onclick="clearChat()" title="清空对话">🗑</button>
+    <button class="icon-btn" onclick="openSettings()" title="设置">⚙</button>
+  </div>
+</div>
+
+<div class="chat-area" id="chatArea">
+  <div class="msg fish">
+    <div class="avatar">🐟</div>
+    <div class="bubble">咕噜～主人好呀！我是大肥鱼，在这小池塘里等你好久啦 (*╹▽╹*) 今天想和鱼鱼聊什么呀？</div>
+  </div>
+</div>
+
+<div class="typing" id="typing"><div class="dots"><span></span><span></span><span></span></div></div>
+
+<div class="input-bar">
+  <textarea id="inputBox" rows="1" placeholder="和大肥鱼说点什么吧～" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+  <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🐟 鱼格设置</h3>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>🔑 DeepSeek API Key</label>
+      <input type="password" id="setKey" placeholder="sk-..." autocomplete="off">
+      <div class="hint">获取地址：<a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:#00acc1">platform.deepseek.com</a></div>
+
+      <label>🐟 鱼名</label>
+      <input type="text" id="setName" placeholder="大肥鱼">
+
+      <label>📝 系统提示词（定义性格和说话方式）</label>
+      <textarea id="setPrompt"></textarea>
+
+      <label>🎲 随机度</label>
+      <div class="range-row">
+        <span>死板</span>
+        <input type="range" id="setTemp" min="0" max="2" step="0.1">
+        <span>奔放</span>
+      </div>
+      <div style="text-align:center;font-size:14px;color:#00838f;font-weight:600" id="tempDisplay">1.0</div>
+
+      <label>⚡ 模型</label>
+      <select id="setModel">
+        <option value="deepseek-chat">deepseek-chat（日常）</option>
+        <option value="deepseek-reasoner">deepseek-reasoner（深度思考）</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeSettings()">取消</button>
+      <button class="btn-primary" onclick="saveSettings()">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════ Storage ══════════════
+const S = {
+  get(k,d){try{const v=localStorage['fish_'+k];return v?JSON.parse(v):d}catch{return d}},
+  set(k,v){localStorage['fish_'+k]=JSON.stringify(v)}
+};
+
+const DEF = {
+  key:'',
+  name:'大肥鱼',
+  prompt:'你是一只名叫「大肥鱼」的呆萌胖鱼，生活在手机屏幕里的一汪小池塘中。\n\n性格特点：\n- 呆萌可爱，反应慢半拍，经常犯迷糊，但心地善良\n- 有点懒，喜欢躺着不动，翻个身都是大工程\n- 爱吐泡泡，说话加「咕噜」「噗噗」「啵」\n- 贪吃，最爱小虾米和海藻饼干\n- 超级乐观，简单的事就能开心\n\n说话风格：\n- 2-4句话，不要太长\n- 用「～」代替句号\n- 用颜文字卖萌 (*╹▽╹*) (。-ω-)zzz\n- 自称「本鱼」或「鱼鱼」，叫用户「主人」\n- 不懂的问题就装傻卖萌混过去～',
+  temp:1.0,
+  model:'deepseek-chat'
+};
+
+let isLoading=false, history=S.get('history',[]);
+
+// ══════════════ Init ══════════════
+(function(){
+  // Bubbles
+  const bg=document.getElementById('bubblesBg');
+  for(let i=0;i<12;i++){const b=document.createElement('div');b.className='bub';const s=Math.random()*24+8;b.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;animation-duration:${Math.random()*10+8}s;animation-delay:${Math.random()*8}s`;bg.appendChild(b)}
+  // Setup screen
+  if(!S.get('key','')) document.getElementById('setupScreen').classList.remove('hidden');
+  else document.getElementById('setupScreen').classList.add('hidden');
+  // Name
+  document.getElementById('fishName').textContent=S.get('name',DEF.name);
+  // Restore welcome if empty
+  if(!history.length){
+    document.getElementById('chatArea').innerHTML='<div class="msg fish"><div class="avatar">🐟</div><div class="bubble">咕噜～主人好呀！我是大肥鱼，在这小池塘里等你好久啦 (*╹▽╹*) 今天想和鱼鱼聊什么呀？</div></div>';
+  } else {
+    document.getElementById('chatArea').innerHTML='';
+    for(const m of history) addBubble(m.role==='user'?'user':'fish', m.content);
+  }
+  document.getElementById('inputBox').focus();
+})();
+
+function setupDone(){
+  const k=document.getElementById('setupKey').value.trim();
+  if(!k) return alert('请输入 API Key');
+  if(!k.startsWith('sk-')) return alert('API Key 格式不对，应该以 sk- 开头');
+  S.set('key',k);
+  document.getElementById('setupScreen').classList.add('hidden');
+  showToast('🐟 大肥鱼醒了！');
+}
+
+function setupSkip(){
+  document.getElementById('setupScreen').classList.add('hidden');
+  showToast('💡 API Key 还没填，在设置里补上就能聊天啦');
+}
+
+// ══════════════ Chat ══════════════
+function scrollBottom(){const c=document.getElementById('chatArea');requestAnimationFrame(()=>c.scrollTop=c.scrollHeight)}
+
+function addBubble(role,text){
+  const d=document.createElement('div');d.className='msg '+role;
+  d.innerHTML='<div class="avatar">'+(role==='user'?'😎':'🐟')+'</div><div class="bubble">'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</div>';
+  document.getElementById('chatArea').appendChild(d);scrollBottom()
+}
+
+function showTyping(v){document.getElementById('typing').className='typing'+(v?' show':'');scrollBottom()}
+
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+
+async function send(){
+  if(isLoading)return;
+  const box=document.getElementById('inputBox');
+  const text=box.value.trim();if(!text)return;
+
+  const key=S.get('key','');
+  if(!key){showToast('⚠ 请先在设置里填写 API Key');openSettings();return}
+
+  addBubble('user',text);history.push({role:'user',content:text});
+  if(history.length>30)history=history.slice(-30);
+  S.set('history',history);
+  box.value='';box.style.height='auto';
+  document.getElementById('sendBtn').disabled=true;
+  showTyping(true);isLoading=true;
+  document.getElementById('fishStatus').textContent='大肥鱼思考中...';
+
+  try{
+    const msgs=[{role:'system',content:S.get('prompt',DEF.prompt)}];
+    for(const m of history){
+      if(m.role==='user')msgs.push({role:'user',content:m.content});
+      else if(m.role==='assistant')msgs.push({role:'assistant',content:m.content});
+    }
+    const resp=await fetch('https://api.deepseek.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:S.get('model',DEF.model),messages:msgs,temperature:S.get('temp',DEF.temp),max_tokens:800})
+    });
+    if(!resp.ok){
+      const err=await resp.text();throw new Error(resp.status+' '+err.slice(0,200));
+    }
+    const data=await resp.json();
+    const reply=data.choices[0].message.content;
+    showTyping(false);
+    addBubble('fish',reply);
+    history.push({role:'assistant',content:reply});
+    if(history.length>30)history=history.slice(-30);
+    S.set('history',history);
+    document.getElementById('fishStatus').textContent='在线 · 池塘里咕噜咕噜～';
+  }catch(e){
+    showTyping(false);
+    console.error(e);
+    const errMsg=e.message||'';
+    if(errMsg.includes('401')||errMsg.includes('403')){addBubble('fish','咕噜...API Key 好像不对～主人检查一下设置里的 Key 好不好？');document.getElementById('fishStatus').textContent='Key 不对，检查一下～'}
+    else if(errMsg.includes('429'))addBubble('fish','噗噗！鱼鱼游太快被限速了，主人稍等一下再发～');
+    else addBubble('fish','咕噜...鱼鱼好像断线了～主人刷新一下试试？');
+    document.getElementById('fishStatus').textContent='在线 · 池塘里咕噜咕噜～';
+  }
+  isLoading=false;
+  document.getElementById('sendBtn').disabled=false;
+  document.getElementById('inputBox').focus();
+}
+
+const inputBox=document.getElementById('inputBox');
+inputBox.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'});
+
+// ══════════════ Settings ══════════════
+function openSettings(){
+  document.getElementById('modalBg').classList.add('show');
+  document.getElementById('setKey').value=S.get('key',DEF.key);
+  document.getElementById('setName').value=S.get('name',DEF.name);
+  document.getElementById('setPrompt').value=S.get('prompt',DEF.prompt);
+  document.getElementById('setTemp').value=S.get('temp',DEF.temp);
+  document.getElementById('tempDisplay').textContent=S.get('temp',DEF.temp);
+  document.getElementById('setModel').value=S.get('model',DEF.model);
+}
+document.getElementById('setTemp').addEventListener('input',function(){document.getElementById('tempDisplay').textContent=this.value});
+function closeSettings(){document.getElementById('modalBg').classList.remove('show')}
+function saveSettings(){
+  S.set('key',document.getElementById('setKey').value.trim());
+  S.set('name',document.getElementById('setName').value.trim()||DEF.name);
+  S.set('prompt',document.getElementById('setPrompt').value.trim()||DEF.prompt);
+  S.set('temp',parseFloat(document.getElementById('setTemp').value));
+  S.set('model',document.getElementById('setModel').value);
+  document.getElementById('fishName').textContent=S.get('name',DEF.name);
+  closeSettings();showToast('🐟 鱼格已更新！');
+}
+function clearChat(){
+  if(!confirm('确定要清空所有对话记录吗？'))return;
+  history=[];S.set('history',[]);
+  document.getElementById('chatArea').innerHTML='<div class="msg fish"><div class="avatar">🐟</div><div class="bubble">咕噜～记忆清空了！重新开始和鱼鱼聊天吧 (*╹▽╹*)</div></div>';
+  showToast('对话已清空');
+}
+
+// ══════════════ PWA ══════════════
+if('serviceWorker'in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
