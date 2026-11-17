@@ -1,5 +1,8 @@
 # 🐟 大肥鱼 — DeepSeek AI Chat PWA
 
+![界面预览](screenshot.png)
+
+
 一个呆萌的 DeepSeek AI 聊天伴侣，纯前端实现，无需后端。
 
 [▶ 在线体验](https://cyc20261.github.io/big-fish/)
