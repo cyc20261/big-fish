@@ -185,13 +185,33 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
 .bubble.sticker{background:transparent!important;padding:0!important;box-shadow:none!important;max-width:180px}
 .bubble.sticker img{width:100%;border-radius:10px;display:block;max-height:240px;object-fit:contain}
 .bubble.sticker::before,.bubble.sticker::after{display:none!important}
-/* voice button */
-.bubble .play-btn{display:inline-flex;align-items:center;gap:2px;margin-top:4px;padding:3px 8px;border:none;border-radius:10px;background:rgba(43,127,255,.1);color:#2b7fff;font-size:11px;cursor:pointer;font-weight:500}
-.bubble .play-btn:active{background:rgba(43,127,255,.2)}
-.bubble .play-btn.playing{background:#2b7fff;color:#fff;animation:pulse .8s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.row.me .bubble .play-btn{background:rgba(255,255,255,.2);color:#fff}
-.row.me .bubble .play-btn.playing{background:rgba(255,255,255,.35);color:#fff}
+/* ───── QQ voice message bubble ───── */
+.voice-bubble{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;cursor:pointer;min-width:60px;transition:.15s;position:relative;white-space:nowrap}
+.voice-bubble:active{transform:scale(.96)}
+.row.her .voice-bubble{background:#fff;color:#111;border-top-left-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.row.her .voice-bubble::before{content:'';position:absolute;left:-6px;top:0;width:0;height:0;border-top:0 solid transparent;border-bottom:10px solid transparent;border-right:7px solid #fff}
+.row.me .voice-bubble{background:linear-gradient(180deg,#4da3ff,#2b7fff);color:#fff;border-top-right-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.row.me .voice-bubble::before{content:'';position:absolute;right:-6px;top:0;width:0;height:0;border-top:0 solid transparent;border-bottom:10px solid transparent;border-left:7px solid #2b7fff}
+/* waveform bars */
+.voice-bars{display:flex;align-items:flex-end;gap:2px;height:28px}
+.voice-bars .vb{width:3px;border-radius:2px;min-height:4px;animation:vbAni .8s ease-in-out infinite alternate}
+.row.her .voice-bars .vb{background:#2b7fff}
+.row.me .voice-bars .vb{background:rgba(255,255,255,.9)}
+.voice-bars .vb:nth-child(1){height:12px;animation-delay:0s}
+.voice-bars .vb:nth-child(2){height:20px;animation-delay:.12s}
+.voice-bars .vb:nth-child(3){height:10px;animation-delay:.24s}
+.voice-bars .vb:nth-child(4){height:26px;animation-delay:.06s}
+.voice-bars .vb:nth-child(5){height:16px;animation-delay:.18s}
+.voice-bars .vb:nth-child(6){height:22px;animation-delay:.3s}
+.voice-bars .vb:nth-child(7){height:14px;animation-delay:.15s}
+@keyframes vbAni{0%{transform:scaleY(.4)}100%{transform:scaleY(1)}}
+/* when playing, bars animate faster + icon shows */
+.voice-bubble.playing .voice-bars .vb{animation-duration:.45s}
+.voice-bubble .voice-icon{font-size:14px;flex-shrink:0}
+.voice-bubble .voice-dur{font-size:11px;color:inherit;opacity:.7;margin-left:2px}
+/* loading state */
+.voice-bubble.loading{opacity:.65;pointer-events:none}
+.voice-bubble.loading .voice-dur::after{content:' 生成中…';font-size:10px;opacity:.8}
 </style>
 </head>
 <body>
@@ -346,6 +366,15 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
         <option value="deepseek-chat">deepseek-chat（日常聊天）</option>
         <option value="deepseek-reasoner">deepseek-reasoner（深度思考）</option>
       </select>
+
+      <label>自动播放语音</label>
+      <div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:8px;padding:8px 12px;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.08)">
+        <span style="font-size:13px;color:#555">大肥鱼回复时自动说话</span>
+        <label style="margin:0;display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="setAutoVoice" checked style="width:18px;height:18px;accent-color:#2b7fff">
+          <span style="font-size:13px;color:#2b7fff">开</span>
+        </label>
+      </div>
 
       <label>对话记录</label>
       <button class="b-danger" style="width:100%;padding:10px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer" onclick="clearChat()">清空全部聊天记录</button>
@@ -599,12 +628,14 @@ function sendStickerReply(){
     showTyping(false);
     addMsg('her',reply,Date.now());
     history.push({role:'assistant',content:reply,ts:Date.now()});
+    if(S.get('autoVoice',true)){setTimeout(()=>autoVoice(reply),400)}
     trim();saveHistory();
     document.getElementById('navSub').textContent='在线 · 在海里漂来漂去～';
   }).catch(()=>{
     showTyping(false);
     addMsg('her','哇这个表情！本鱼好喜欢～🐳💙');
     history.push({role:'assistant',content:'哇这个表情！本鱼好喜欢～🐳💙',ts:Date.now()});
+    if(S.get('autoVoice',true)){setTimeout(()=>autoVoice('哇这个表情！本鱼好喜欢～'),400)}
     trim();saveHistory();
     document.getElementById('navSub').textContent='在线 · 在海里漂来漂去～';
   }).finally(()=>{loading=false;document.getElementById('sendBtn').disabled=false});
@@ -677,13 +708,6 @@ function addMsg(who,text,ts,scroll,sticker){
     }else{
       row.innerHTML='<div class="ava"><img src="avatar.jpg" alt=""></div>';
       row.appendChild(bubble);
-      /* voice play button */
-      if(text&&!sticker){
-        const pb=document.createElement('button');
-        pb.className='play-btn';pb.innerHTML='🔊 播放';pb.title='听语音';
-        pb.onclick=(e)=>{e.stopPropagation();toggleTTS(pb,text)};
-        bubble.appendChild(pb);
-      }
     }
   }
   chat.appendChild(row);
@@ -766,6 +790,8 @@ async function send(){
     showTyping(false);
     addMsg('her',reply,Date.now());
     history.push({role:'assistant',content:reply,ts:Date.now()});
+    /* auto voice — generate QQ-style voice bubble */
+    if(S.get('autoVoice',true)){setTimeout(()=>autoVoice(reply),400)}
     /* random sticker — 25% chance, from meme pack only */
     if(Math.random()<0.25){
       const s=MEME_STICKERS[Math.floor(Math.random()*MEME_STICKERS.length)];
@@ -805,6 +831,7 @@ function openSheet(){
   document.getElementById('setTemp').value=t;
   document.getElementById('tempVal').textContent=t;
   document.getElementById('setModel').value=S.get('model','deepseek-chat');
+  document.getElementById('setAutoVoice').checked=S.get('autoVoice',true);
   buildPickers();
   refreshAvatarPreview();
   document.getElementById('sheetBg').classList.add('show');
@@ -848,6 +875,7 @@ function saveSettings(){
   S.set('prompt',document.getElementById('setPrompt').value.trim()||DEF_PROMPT);
   S.set('temp',parseFloat(document.getElementById('setTemp').value));
   S.set('model',document.getElementById('setModel').value);
+  S.set('autoVoice',document.getElementById('setAutoVoice').checked);
   document.getElementById('navTitle').textContent=remark;
   document.title=remark;
   closeSheet();
@@ -860,37 +888,102 @@ function clearChat(){
   showToast('已清空');
 }
 
-/* ═════════ voice TTS ═════════ */
-let ttsUtterance=null;
-function toggleTTS(btn,text){
-  if(ttsUtterance&&window.speechSynthesis.speaking){
-    window.speechSynthesis.cancel();
-    btn.classList.remove('playing');btn.innerHTML='🔊 播放';
-    ttsUtterance=null;return;
-  }
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='zh-CN';u.rate=1.05;u.pitch=1.15;u.volume=1;
-  /* pick best Chinese female voice */
-  const voices=speechSynthesis.getVoices();
-  const preferred=['Microsoft Xiaoxiao','Microsoft Xiaoyi','Microsoft Yunxi','Tingting','Yaoyao','Meijia'];
-  for(const pf of preferred){
-    const v=voices.find(x=>x.name.includes(pf));
-    if(v){u.voice=v;break}
-  }
-  if(!u.voice){
-    const zh=voices.find(x=>x.lang.startsWith('zh')&&x.name.toLowerCase().includes('female'));
-    if(zh)u.voice=zh;
-  }
-  btn.classList.add('playing');btn.innerHTML='🔊 播放中…';
-  u.onend=u.onerror=()=>{btn.classList.remove('playing');btn.innerHTML='🔊 播放';ttsUtterance=null};
-  ttsUtterance=u;
-  speechSynthesis.speak(u);
+/* ═════════ voice TTS via DeepSeek ═════════ */
+const _voiceCache={}; /* textHash → {blob, duration} */
+let _activeVoiceAudio=null;
+
+async function genVoice(text,key){
+  /* text hash for cache */
+  const h=text.slice(0,80);
+  if(_voiceCache[h])return _voiceCache[h];
+  const resp=await fetch('https://api.deepseek.com/v1/tools/tts',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({text:text,voice_id:'stella',format:'wav',filter_markdown:true})
+  });
+  if(!resp.ok)throw new Error('TTS '+resp.status);
+  const blob=await resp.blob();
+  /* get duration from audio */
+  const dur=await new Promise(r=>{
+    const a=new Audio();a.preload='metadata';
+    a.onloadedmetadata=()=>r(Math.max(1,Math.round(a.duration)));
+    a.onerror=()=>r(0);
+    a.src=URL.createObjectURL(blob);
+  });
+  const result={blob,dur:Math.round(dur||text.length/2.5)};
+  _voiceCache[h]=result;
+  return result;
 }
-/* preload voices */
-if('speechSynthesis' in window){
-  speechSynthesis.getVoices();
-  speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();
+
+/** play an audio blob on a voice bubble element */
+function playVoiceBubble(el,blob){
+  if(_activeVoiceAudio){_activeVoiceAudio.pause();_activeVoiceAudio=null}
+  /* stop all other playing bubbles */
+  document.querySelectorAll('.voice-bubble.playing').forEach(v=>v.classList.remove('playing'));
+  const audio=new Audio(URL.createObjectURL(blob));
+  el.classList.add('playing');
+  audio.onended=audio.onerror=()=>{el.classList.remove('playing');_activeVoiceAudio=null};
+  audio.play().catch(()=>el.classList.remove('playing'));
+  _activeVoiceAudio=audio;
 }
+
+/** create a QQ voice bubble (no text — just waveform + duration) */
+function addVoiceMsg(who,blob,dur,ts){
+  const chat=document.getElementById('chat');
+  const row=document.createElement('div');
+  row.className='row '+(who==='user'?'me':'her');
+  row.style.animation='msgIn .22s ease-out';
+
+  const vb=document.createElement('div');
+  vb.className='voice-bubble';
+
+  /* waveform */
+  const bars=document.createElement('span');
+  bars.className='voice-bars';
+  for(let i=0;i<7;i++){const b=document.createElement('span');b.className='vb';bars.appendChild(b)}
+  vb.appendChild(bars);
+
+  /* icon + duration */
+  const icon=document.createElement('span');
+  icon.className='voice-icon';
+  icon.textContent='🔊';
+  vb.appendChild(icon);
+
+  const durEl=document.createElement('span');
+  durEl.className='voice-dur';
+  durEl.textContent=dur+'″';
+  vb.appendChild(durEl);
+
+  /* click to play */
+  vb.onclick=()=>playVoiceBubble(vb,blob);
+
+  if(who==='user'){
+    row.innerHTML='<div class="ava user" style="font-size:20px">😎</div>';
+    row.appendChild(vb);
+    const a=row.querySelector('.ava.user');if(a)applyMyAvatar(a);
+  }else{
+    row.innerHTML='<div class="ava"><img src="avatar.jpg" alt=""></div>';
+    row.appendChild(vb);
+  }
+  chat.appendChild(row);
+  toBottom();
+  return row;
+}
+
+/** generate voice asynchronously for a bot reply */
+async function autoVoice(replyText){
+  const key=S.get('key','');
+  if(!key)return;
+  try{
+    const {blob,dur}=await genVoice(replyText,key);
+    addVoiceMsg('her',blob,dur,Date.now());
+  }catch(e){
+    console.warn('voice gen failed:',e.message);
+  }
+}
+
+/* clean up old */
+if('speechSynthesis' in window)try{speechSynthesis.cancel()}catch(e){}
 
 /* ═════════ boot ═════════ */
 function setupDone(){
