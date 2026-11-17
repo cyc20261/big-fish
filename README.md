@@ -2,7 +2,7 @@
 
 一个呆萌的 DeepSeek AI 聊天伴侣，纯前端实现，无需后端。
 
-[▶ 在线体验](https://big-fish-omega.vercel.app)
+[▶ 在线体验](https://cyc20261.github.io/big-fish/)
 
 ## ✨ 功能
 
