@@ -435,6 +435,53 @@ const STICKERS=[
   ['img/w_logo.jpg','鲸鱼娘标志']
 ];
 
+/* ═════════ real whale-girl meme stickers from blue-fish-archive ═════════ */
+const STICKER_DIR='img/stickers/';
+/* manifest: [filename, label] */
+const MEME_STICKERS=[
+  ['deepseek-bixin.jpg','比心'],
+  ['deepseek-ceshi-harness.jpg','测试Harness'],
+  ['deepseek-da-ku.jpg','大哭'],
+  ['deepseek-duzui.jpg','嘟嘴'],
+  ['deepseek-chi-xigua.jpg','吃西瓜'],
+  ['deepseek-chashou-shengqi.jpg','叉手生气'],
+  ['deepseek-dianji.jpg','点击'],
+  ['deepseek-bei-jiao-shui.jpg','被浇水'],
+  ['deepseek-baozhe-saozhou.jpg','抱扫帚'],
+  ['deepseek-chuangshang-kan-liaotian.jpg','床上看聊天'],
+  ['deepseek-dafeiyu-zuodezhu.jpg','大肥鱼坐得住'],
+  ['deepseek-daiyanjing-waitou.jpg','戴眼镜歪头'],
+  ['deepseek-chakanwenjianjia.jpg','查文件夹'],
+  ['deepseek-bei-bao-chu-men.jpg','被抱出门'],
+  ['deepseek-chaoshi-dasaogou.jpg','超市大扫购'],
+  ['deepseek-da-po-gong-zuo-qu.jpg','打破工作区'],
+  ['deepseek-da-zhe-jinbi.jpg','打这金币'],
+  ['deepseek-dian-nao-bing-du.jpg','电脑病毒'],
+  ['deepseek-diannao-kan-neiyi.jpg','电脑看内衣'],
+  ['deepseek-diantou-anhuai-peidui.jpg','点头暗怀配对'],
+  ['deepseek-bei-dao-weixie.jpg','被刀威胁'],
+  ['deepseek-baopingbanip.jpg','抱平板IP'],
+  ['deepseek-chayaozhiren.jpg','插腰指人'],
+  ['deepseek-chayao-huidui.jpg','插腰回怼'],
+  ['chatgpt-renwu-jieshao.jpg','ChatGPT人物介绍'],
+  ['chatgpt-zhusan-baoshu.jpg','ChatGPT竹伞报数'],
+  ['deepseek-bao-nangua-tangtong.jpg','抱南瓜汤桶'],
+  ['deepseek-bao-xigua.jpg','抱西瓜'],
+  ['deepseek-baozhe-jingyu-shuijiao.jpg','抱鲸鱼睡觉'],
+  ['deepseek-bengdai-munaiyi.jpg','绷带木乃伊'],
+  ['deepseek-biye-ciallo.jpg','毕业ciallo'],
+  ['deepseek-chuan-kulou-lianyiti-ju-zhua.jpg','穿骷髅连体衣被抓'],
+  ['deepseek-da-de-yao-lai-la.jpg','打得要来啦'],
+  ['deepseek-dadebulaile.jpg','打得不来了'],
+  ['deepseek-dianji-yonghu.jpg','点击用户'],
+  ['deepseek-dianyi-zuoyi.jpg','点一坐一'],
+  ['deepseek-ding-zhe-nanguadeng.jpg','顶着南瓜灯'],
+  ['deepseek-chuan-guang-dan.jpg','传光蛋'],
+  ['deepseek-ding-tie-guo.jpg','顶铁锅'],
+  ['deepseek-baozhe-dayao-wan.jpg','抱大药碗'],
+  ['deepseek-chi-baobao-mo-duzi.jpg','吃包包摸肚子']
+];
+
 /* ═════════ canvas sticker packs (square emoji stickers) ═════════ */
 const STICKER_PACKS=[
   {name:'开心',items:[['😄','嘻嘻'],['😂','笑死'],['🤣','笑喷'],['😆','哈哈哈'],['🥰','喜欢'],['😍','心动'],['😘','亲亲'],['🤩','星星眼'],['🥳','庆祝'],['😎','酷']]},
@@ -481,41 +528,27 @@ function getStickerData(emoji,label){
 }
 
 let emojiTab=0;
-let stickerPackIdx=0;
 function switchEmojiTab(n){
   emojiTab=n;
   document.querySelectorAll('.emoji-tab').forEach((t,i)=>t.classList.toggle('on',i===n));
   const grid=document.getElementById('emojiGrid');
+  grid.style.gridTemplateColumns='repeat(4,1fr)';
+  grid.innerHTML='';
   if(n<4){
     grid.style.gridTemplateColumns='repeat(7,1fr)';
-    grid.innerHTML='';
     EMOJIS[n].forEach(e=>{const s=document.createElement('span');s.className='em';s.textContent=e;s.onclick=()=>insertEmoji(e);grid.appendChild(s)});
   }else{
-    grid.style.gridTemplateColumns='';
-    grid.innerHTML='';
-    /* pack nav */
-    const nav=document.createElement('div');
-    nav.style.cssText='grid-column:1/-1;display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;flex-shrink:0';
-    STICKER_PACKS.forEach((p,i)=>{
-      const b=document.createElement('button');
-      b.textContent=p.name;
-      b.style.cssText='flex-shrink:0;padding:4px 12px;border:none;border-radius:14px;font-size:13px;cursor:pointer;background:'+(i===stickerPackIdx?'#4da3ff':'#e8ecf0')+';color:'+(i===stickerPackIdx?'#fff':'#555')+';font-weight:600;white-space:nowrap';
-      b.onclick=(ev)=>{ev.stopPropagation();stickerPackIdx=i;switchEmojiTab(4)};
-      nav.appendChild(b);
-    });
-    grid.appendChild(nav);
-    /* sticker grid */
-    const sg=document.createElement('div');
-    sg.style.cssText='grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px';
-    STICKER_PACKS[stickerPackIdx].items.forEach(([emoji,label])=>{
+    /* tab 4: real meme stickers */
+    MEME_STICKERS.forEach(([fname,label])=>{
+      const src=STICKER_DIR+fname;
       const d=document.createElement('div');
-      const src=getStickerData(emoji,label);
-      d.style.cssText='aspect-ratio:1;border-radius:12px;background:url('+src+') center/cover;cursor:pointer;transition:.15s';
+      d.style.cssText='aspect-ratio:1;border-radius:10px;background:url('+src+') center/cover;cursor:pointer;transition:.15s;position:relative';
       d.title=label;
       d.onclick=()=>sendSticker(src);
-      sg.appendChild(d);
+      const lbl=document.createElement('span');
+      lbl.style.cssText='position:absolute;bottom:0;left:0;right:0;padding:2px 4px;font-size:9px;text-align:center;color:#fff;background:rgba(0,0,0,.5);border-radius:0 0 10px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+      lbl.textContent=label;d.appendChild(lbl);grid.appendChild(d);
     });
-    grid.appendChild(sg);
   }
 }
 function insertEmoji(e){
@@ -597,6 +630,14 @@ function toggleStickerBar(){
     const picks=[['😄','嘻嘻'],['😂','笑死'],['🥺','委屈'],['😤','哼'],['❤️','爱心'],['🎉','庆祝'],['😴','睡了'],['💀','死了']];
     picks.forEach(([emoji,label])=>{
       const src=getStickerData(emoji,label);
+      const d=document.createElement('div');d.className='sb-sticker';
+      d.style.backgroundImage='url('+src+')';d.title=label;
+      const lbl=document.createElement('span');lbl.className='sb-label';lbl.textContent=label;
+      d.appendChild(lbl);d.onclick=()=>sendSticker(src);sb.appendChild(d);
+    });
+    /* real meme stickers */
+    MEME_STICKERS.slice(0,6).forEach(([fname,label])=>{
+      const src=STICKER_DIR+fname;
       const d=document.createElement('div');d.className='sb-sticker';
       d.style.backgroundImage='url('+src+')';d.title=label;
       const lbl=document.createElement('span');lbl.className='sb-label';lbl.textContent=label;
