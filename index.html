@@ -616,27 +616,7 @@ function toggleStickerBar(){
   if(sb.classList.contains('show')){sb.classList.remove('show');return}
   /* fill if empty */
   if(!sb.children.length){
-    STICKERS.forEach(([src,label])=>{
-      const d=document.createElement('div');
-      d.className='sb-sticker';
-      d.style.backgroundImage='url('+src+')';
-      d.title=label;
-      const lbl=document.createElement('span');lbl.className='sb-label';lbl.textContent=label;
-      d.appendChild(lbl);
-      d.onclick=()=>sendSticker(src);
-      sb.appendChild(d);
-    });
-    /* add generated emoji stickers */
-    const picks=[['😄','嘻嘻'],['😂','笑死'],['🥺','委屈'],['😤','哼'],['❤️','爱心'],['🎉','庆祝'],['😴','睡了'],['💀','死了']];
-    picks.forEach(([emoji,label])=>{
-      const src=getStickerData(emoji,label);
-      const d=document.createElement('div');d.className='sb-sticker';
-      d.style.backgroundImage='url('+src+')';d.title=label;
-      const lbl=document.createElement('span');lbl.className='sb-label';lbl.textContent=label;
-      d.appendChild(lbl);d.onclick=()=>sendSticker(src);sb.appendChild(d);
-    });
-    /* real meme stickers */
-    MEME_STICKERS.slice(0,6).forEach(([fname,label])=>{
+    MEME_STICKERS.forEach(([fname,label])=>{
       const src=STICKER_DIR+fname;
       const d=document.createElement('div');d.className='sb-sticker';
       d.style.backgroundImage='url('+src+')';d.title=label;
@@ -772,10 +752,10 @@ async function send(){
     showTyping(false);
     addMsg('her',reply,Date.now());
     history.push({role:'assistant',content:reply,ts:Date.now()});
-    /* random sticker — 25% chance */
+    /* random sticker — 25% chance, from meme pack only */
     if(Math.random()<0.25){
-      const s=STICKERS[Math.floor(Math.random()*STICKERS.length)];
-      setTimeout(()=>{addMsg('her','',Date.now(),true,s[0]);history.push({role:'assistant',content:'[表情]',ts:Date.now(),sticker:s[0]});saveHistory()},800);
+      const s=MEME_STICKERS[Math.floor(Math.random()*MEME_STICKERS.length)];
+      setTimeout(()=>{addMsg('her','',Date.now(),true,STICKER_DIR+s[0]);history.push({role:'assistant',content:'[表情]',ts:Date.now(),sticker:STICKER_DIR+s[0]});saveHistory()},800);
     }
     trim();saveHistory();
     document.getElementById('navSub').textContent='在线 · 在海里漂来漂去～';
