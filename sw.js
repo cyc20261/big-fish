@@ -1,6 +1,6 @@
 // 大肥鱼 Service Worker — HTML 用网络优先，图片用缓存
-const CACHE = 'big-fish-v4';
-const ASSETS = ['/avatar.jpg'];
+const CACHE = 'big-fish-v5';
+const ASSETS = ['/avatar.jpg','/manifest.json','/icon-192.png','/icon-512.png'];
 
 self.addEventListener('install', e => {
   self.skipWaiting();
