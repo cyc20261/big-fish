@@ -185,6 +185,13 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
 .bubble.sticker{background:transparent!important;padding:0!important;box-shadow:none!important;max-width:180px}
 .bubble.sticker img{width:100%;border-radius:10px;display:block;max-height:240px;object-fit:contain}
 .bubble.sticker::before,.bubble.sticker::after{display:none!important}
+/* voice button */
+.bubble .play-btn{display:inline-flex;align-items:center;gap:2px;margin-top:4px;padding:3px 8px;border:none;border-radius:10px;background:rgba(43,127,255,.1);color:#2b7fff;font-size:11px;cursor:pointer;font-weight:500}
+.bubble .play-btn:active{background:rgba(43,127,255,.2)}
+.bubble .play-btn.playing{background:#2b7fff;color:#fff;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.row.me .bubble .play-btn{background:rgba(255,255,255,.2);color:#fff}
+.row.me .bubble .play-btn.playing{background:rgba(255,255,255,.35);color:#fff}
 </style>
 </head>
 <body>
@@ -670,6 +677,13 @@ function addMsg(who,text,ts,scroll,sticker){
     }else{
       row.innerHTML='<div class="ava"><img src="avatar.jpg" alt=""></div>';
       row.appendChild(bubble);
+      /* voice play button */
+      if(text&&!sticker){
+        const pb=document.createElement('button');
+        pb.className='play-btn';pb.innerHTML='🔊 播放';pb.title='听语音';
+        pb.onclick=(e)=>{e.stopPropagation();toggleTTS(pb,text)};
+        bubble.appendChild(pb);
+      }
     }
   }
   chat.appendChild(row);
@@ -844,6 +858,38 @@ function clearChat(){
   if(!confirm('确定清空全部聊天记录吗？'))return;
   history=[];saveHistory();renderHistory();closeSheet();
   showToast('已清空');
+}
+
+/* ═════════ voice TTS ═════════ */
+let ttsUtterance=null;
+function toggleTTS(btn,text){
+  if(ttsUtterance&&window.speechSynthesis.speaking){
+    window.speechSynthesis.cancel();
+    btn.classList.remove('playing');btn.innerHTML='🔊 播放';
+    ttsUtterance=null;return;
+  }
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='zh-CN';u.rate=1.05;u.pitch=1.15;u.volume=1;
+  /* pick best Chinese female voice */
+  const voices=speechSynthesis.getVoices();
+  const preferred=['Microsoft Xiaoxiao','Microsoft Xiaoyi','Microsoft Yunxi','Tingting','Yaoyao','Meijia'];
+  for(const pf of preferred){
+    const v=voices.find(x=>x.name.includes(pf));
+    if(v){u.voice=v;break}
+  }
+  if(!u.voice){
+    const zh=voices.find(x=>x.lang.startsWith('zh')&&x.name.toLowerCase().includes('female'));
+    if(zh)u.voice=zh;
+  }
+  btn.classList.add('playing');btn.innerHTML='🔊 播放中…';
+  u.onend=u.onerror=()=>{btn.classList.remove('playing');btn.innerHTML='🔊 播放';ttsUtterance=null};
+  ttsUtterance=u;
+  speechSynthesis.speak(u);
+}
+/* preload voices */
+if('speechSynthesis' in window){
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();
 }
 
 /* ═════════ boot ═════════ */
