@@ -13,103 +13,137 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#e0f7fa 0%,#b2ebf2 30%,#4dd0e1 70%,#00acc1 100%);display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent;user-select:none}
-.header{background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(0,172,193,.2);z-index:10;flex-shrink:0}
-.fish-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#ff9800,#ff5722);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px rgba(255,87,34,.4);animation:swim 2s ease-in-out infinite;flex-shrink:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent;user-select:none;transition:background .6s ease}
+
+/* ═══════════ Themes ═══════════ */
+.theme-sakura{--bg1:#fce4ec;--bg2:#f8bbd0;--bg3:#f06292;--bg4:#c2185b;--accent:#e91e63;--accent2:#ad1457;--bubble-user1:#880e4f;--bubble-user2:#ad1457;--bubble-fish:rgba(255,255,255,.92);--text-fish:#4a2c3a;--header-text:#880e4f;--sub:#c2185b;--input-bg:#fce4ec;--input-ph:rgba(233,30,99,.3);--send-btn1:#e91e63;--send-btn2:#ad1457;--modal-accent:#e91e63;--whale-color:rgba(233,30,99,.15);--whale-color2:rgba(233,30,99,.08);--bubble-op:rgba(255,182,193,.3);--avatar-fish:linear-gradient(135deg,#f48fb1,#e91e63);--avatar-user:linear-gradient(135deg,#ce93d8,#ab47bc)}
+.theme-abyss{--bg1:#0d1b2a;--bg2:#1b2838;--bg3:#0b3d5c;--bg4:#041420;--accent:#00bcd4;--accent2:#006064;--bubble-user1:#004d40;--bubble-user2:#00695c;--bubble-fish:rgba(255,255,255,.9);--text-fish:#b0bec5;--header-text:#80deea;--sub:#4dd0e1;--input-bg:rgba(0,188,212,.08);--input-ph:rgba(0,188,212,.3);--send-btn1:#00bcd4;--send-btn2:#006064;--modal-accent:#00bcd4;--whale-color:rgba(0,188,212,.12);--whale-color2:rgba(0,188,212,.06);--bubble-op:rgba(0,188,212,.12);--avatar-fish:linear-gradient(135deg,#4dd0e1,#00bcd4);--avatar-user:linear-gradient(135deg,#26c6da,#00838f)}
+.theme-aurora{--bg1:#1a1a2e;--bg2:#16213e;--bg3:#0f3460;--bg4:#533483;--accent:#7c4dff;--accent2:#651fff;--bubble-user1:#311b92;--bubble-user2:#4527a0;--bubble-fish:rgba(255,255,255,.88);--text-fish:#d1c4e9;--header-text:#b388ff;--sub:#7c4dff;--input-bg:rgba(124,77,255,.08);--input-ph:rgba(124,77,255,.25);--send-btn1:#7c4dff;--send-btn2:#4a148c;--modal-accent:#7c4dff;--whale-color:rgba(179,136,255,.1);--whale-color2:rgba(179,136,255,.05);--bubble-op:rgba(179,136,255,.1);--avatar-fish:linear-gradient(135deg,#b388ff,#7c4dff);--avatar-user:linear-gradient(135deg,#00e676,#00bcd4)}
+.theme-coral{--bg1:#fff3e0;--bg2:#ffe0b2;--bg3:#ff9800;--bg4:#e65100;--accent:#ff6f00;--accent2:#bf360c;--bubble-user1:#bf360c;--bubble-user2:#e65100;--bubble-fish:rgba(255,255,255,.92);--text-fish:#5d4037;--header-text:#bf360c;--sub:#e65100;--input-bg:#fff3e0;--input-ph:rgba(255,111,0,.25);--send-btn1:#ff9800;--send-btn2:#e65100;--modal-accent:#ff6f00;--whale-color:rgba(255,152,0,.12);--whale-color2:rgba(255,152,0,.06);--bubble-op:rgba(255,183,77,.3);--avatar-fish:linear-gradient(135deg,#ffab40,#ff6f00);--avatar-user:linear-gradient(135deg,#ff7043,#d84315)}
+.theme-moon{--bg1:#263238;--bg2:#37474f;--bg3:#455a64;--bg4:#1a2327;--accent:#90a4ae;--accent2:#546e7a;--bubble-user1:#37474f;--bubble-user2:#455a64;--bubble-fish:rgba(255,255,255,.9);--text-fish:#cfd8dc;--header-text:#b0bec5;--sub:#78909c;--input-bg:rgba(144,164,174,.1);--input-ph:rgba(144,164,174,.3);--send-btn1:#78909c;--send-btn2:#455a64;--modal-accent:#607d8b;--whale-color:rgba(176,190,197,.1);--whale-color2:rgba(176,190,197,.05);--bubble-op:rgba(176,190,197,.1);--avatar-fish:linear-gradient(135deg,#b0bec5,#78909c);--avatar-user:linear-gradient(135deg,#90a4ae,#546e7a)}
+
+body{background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 30%,var(--bg3) 70%,var(--bg4) 100%)}
+
+.header{background:rgba(255,255,255,.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bubble-op);z-index:10;flex-shrink:0}
+.fish-avatar{width:40px;height:40px;border-radius:50%;background:var(--avatar-fish);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 12px var(--bubble-op);animation:swim 2s ease-in-out infinite;flex-shrink:0}
 @keyframes swim{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-.header-info h2{font-size:17px;color:#006064;line-height:1.2}
-.header-info p{font-size:11px;color:#00838f}
+.header-info h2{font-size:17px;color:var(--header-text);line-height:1.2}
+.header-info p{font-size:11px;color:var(--sub)}
 .header-right{margin-left:auto;display:flex;gap:6px}
-.icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,172,193,.2);background:rgba(255,255,255,.6);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.icon-btn:active{background:rgba(0,172,193,.2);transform:scale(.92)}
-.chat-area{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--bubble-op);background:rgba(255,255,255,.06);color:var(--header-text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.icon-btn:active{background:var(--bubble-op);transform:scale(.92)}
+
+/* Whale wallpaper canvas */
+#whaleCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+
+.chat-area{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;position:relative;z-index:1}
 .chat-area::-webkit-scrollbar{width:0}
 .msg{display:flex;gap:8px;max-width:88%;animation:msgIn .25s ease-out}
 @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .msg.user{align-self:flex-end;flex-direction:row-reverse}
 .msg.fish{align-self:flex-start}
 .msg .avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
-.msg.fish .avatar{background:linear-gradient(135deg,#ff9800,#ff5722)}
-.msg.user .avatar{background:linear-gradient(135deg,#26c6da,#00bcd4)}
+.msg.fish .avatar{background:var(--avatar-fish)}
+.msg.user .avatar{background:var(--avatar-user)}
 .msg .bubble{padding:10px 14px;border-radius:16px;font-size:15px;line-height:1.6;word-break:break-word}
-.msg.user .bubble{background:linear-gradient(135deg,#006064,#00838f);color:#fff;border-bottom-right-radius:4px}
-.msg.fish .bubble{background:rgba(255,255,255,.92);color:#37474f;border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.typing{display:none;padding:10px 16px;align-self:flex-start}
+.msg.user .bubble{background:linear-gradient(135deg,var(--bubble-user1),var(--bubble-user2));color:#fff;border-bottom-right-radius:4px}
+.msg.fish .bubble{background:var(--bubble-fish);color:var(--text-fish);border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.typing{display:none;padding:10px 16px;align-self:flex-start;z-index:1}
 .typing.show{display:flex}
 .typing .dots{display:flex;gap:4px}
-.typing .dots span{width:7px;height:7px;border-radius:50%;background:#00acc1;animation:bounce 1.4s ease-in-out infinite}
+.typing .dots span{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:bounce 1.4s ease-in-out infinite}
 .typing .dots span:nth-child(2){animation-delay:.2s}
 .typing .dots span:nth-child(3){animation-delay:.4s}
 @keyframes bounce{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1);opacity:1}}
-.input-bar{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:8px 10px;display:flex;gap:6px;align-items:flex-end;border-top:1px solid rgba(0,172,193,.15);flex-shrink:0;padding-bottom:max(8px,env(safe-area-inset-bottom))}
-.input-bar textarea{flex:1;border:none;border-radius:18px;padding:10px 14px;font-size:15px;resize:none;outline:none;background:#e0f7fa;max-height:80px;line-height:1.4;font-family:inherit}
-.input-bar textarea::placeholder{color:#80deea}
-.send-btn{width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,#00acc1,#00838f);color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,131,143,.35);transition:transform .15s}
+.input-bar{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:8px 10px;display:flex;gap:6px;align-items:flex-end;border-top:1px solid var(--bubble-op);flex-shrink:0;padding-bottom:max(8px,env(safe-area-inset-bottom));z-index:1}
+.input-bar textarea{flex:1;border:none;border-radius:18px;padding:10px 14px;font-size:15px;resize:none;outline:none;background:var(--input-bg);color:var(--header-text);max-height:80px;line-height:1.4;font-family:inherit}
+.input-bar textarea::placeholder{color:var(--input-ph)}
+.send-btn{width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--send-btn1),var(--send-btn2));color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px var(--bubble-op);transition:transform .15s}
 .send-btn:active{transform:scale(.88)}
 .send-btn:disabled{opacity:.45;pointer-events:none}
+
 /* Modal */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-end;justify-content:center}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
 .modal-bg.show{display:flex}
-.modal{background:#fff;width:100%;max-width:480px;max-height:85vh;border-radius:20px 20px 0 0;padding:0;overflow:hidden;animation:slideUp .28s ease-out}
+.modal{background:var(--bg2);color:var(--text-fish);width:100%;max-width:480px;max-height:85vh;border-radius:20px 20px 0 0;padding:0;overflow:hidden;animation:slideUp .28s ease-out;border:1px solid var(--bubble-op);border-bottom:none}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-header{padding:16px 18px 12px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between}
-.modal-header h3{font-size:18px;color:#006064}
-.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:#f5f5f5;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-header{padding:16px 18px 12px;border-bottom:1px solid var(--bubble-op);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:18px;color:var(--header-text)}
+.modal-close{width:32px;height:32px;border-radius:50%;border:1px solid var(--bubble-op);background:var(--bg1);color:var(--header-text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .modal-body{padding:16px 18px;overflow-y:auto;max-height:calc(85vh - 70px)}
-.modal-body label{display:block;font-size:13px;color:#546e7a;margin:10px 0 4px;font-weight:600}
-.modal-body input,.modal-body textarea,.modal-body select{width:100%;border:1px solid #b2dfdb;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:#fafafa;transition:border-color .15s}
-.modal-body input:focus,.modal-body textarea:focus{border-color:#00acc1;background:#fff}
-.modal-body textarea{height:150px;resize:vertical;font-size:13px;line-height:1.5}
-.modal-body .hint{font-size:11px;color:#999;margin-top:2px}
+.modal-body label{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px;font-weight:600}
+.modal-body input,.modal-body textarea,.modal-body select{width:100%;border:1px solid var(--bubble-op);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:var(--bg1);color:var(--header-text);transition:border-color .15s}
+.modal-body input:focus,.modal-body textarea:focus{border-color:var(--accent)}
+.modal-body textarea{height:120px;resize:vertical;font-size:13px;line-height:1.5}
+.modal-body .hint{font-size:11px;color:var(--sub);margin-top:2px;opacity:.7}
+.modal-body .hint a{color:var(--accent)}
 .modal-body .range-row{display:flex;align-items:center;gap:8px}
 .modal-body .range-row input[type=range]{flex:1}
-.modal-body .range-row span{font-size:13px;color:#00838f;font-weight:600;min-width:28px;text-align:center}
-.modal-footer{padding:12px 18px;border-top:1px solid #eee;display:flex;gap:8px}
+.modal-body .range-row span{font-size:13px;color:var(--sub);font-weight:600;min-width:28px;text-align:center}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--bubble-op);display:flex;gap:8px}
 .modal-footer button{flex:1;padding:10px;border-radius:18px;border:none;font-size:15px;cursor:pointer;font-weight:600}
-.btn-primary{background:linear-gradient(135deg,#00acc1,#00838f);color:#fff}
-.btn-secondary{background:#e8e8e8;color:#666}
-.btn-danger{background:#ffcdd2;color:#c62828}
+.btn-primary{background:linear-gradient(135deg,var(--send-btn1),var(--send-btn2));color:#fff}
+.btn-secondary{background:var(--bg1);color:var(--sub);border:1px solid var(--bubble-op)}
+.btn-danger{background:rgba(244,67,54,.15);color:#ef5350}
+
+/* Theme picker */
+.theme-picker{display:flex;gap:8px;flex-wrap:wrap}
+.theme-dot{width:42px;height:42px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative;overflow:hidden}
+.theme-dot.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--bubble-op)}
+.theme-dot::after{content:attr(data-emoji);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px}
+.theme-dot.sakura{background:linear-gradient(135deg,#fce4ec,#f06292)}
+.theme-dot.abyss{background:linear-gradient(135deg,#0d1b2a,#00bcd4)}
+.theme-dot.aurora{background:linear-gradient(135deg,#1a1a2e,#7c4dff)}
+.theme-dot.coral{background:linear-gradient(135deg,#fff3e0,#ff9800)}
+.theme-dot.moon{background:linear-gradient(135deg,#263238,#90a4ae)}
+
+/* Theme name display */
+.theme-name{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;background:var(--bubble-op);color:var(--accent);margin-left:6px}
+
 /* Toast */
 .toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:200;background:rgba(0,0,0,.78);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap}
 .toast.show{opacity:1}
+
 /* Setup screen */
-.setup-screen{position:fixed;inset:0;background:linear-gradient(180deg,#e0f7fa,#00acc1);z-index:300;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;gap:16px}
+.setup-screen{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;gap:16px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 .setup-screen.hidden{display:none}
-.setup-card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.12)}
-.setup-card h2{font-size:22px;color:#006064;margin-bottom:4px}
-.setup-card p{font-size:13px;color:#78909c;margin-bottom:16px}
-.setup-card label{font-size:13px;color:#546e7a;font-weight:600;display:block;margin-bottom:4px}
-.setup-card input{width:100%;border:1px solid #b2dfdb;border-radius:10px;padding:10px 12px;font-size:14px;outline:none;margin-bottom:12px}
-.setup-card input:focus{border-color:#00acc1}
-.setup-card button{width:100%;padding:12px;border-radius:20px;border:none;background:linear-gradient(135deg,#00acc1,#00838f);color:#fff;font-size:16px;font-weight:600;cursor:pointer}
-.setup-card .skip{background:none;color:#999;font-size:13px;margin-top:8px;font-weight:400;text-decoration:underline}
-/* Bubbles */
-.bubbles-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.bub{position:absolute;background:rgba(255,255,255,.25);border-radius:50%;animation:float linear infinite}
-@keyframes float{0%{bottom:-50px;opacity:0}15%{opacity:.4}85%{opacity:.2}100%{bottom:110%;opacity:0}}
+.setup-card{background:var(--bg2);border-radius:20px;padding:24px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.2);border:1px solid var(--bubble-op)}
+.setup-card h2{font-size:22px;color:var(--header-text);margin-bottom:4px}
+.setup-card p{font-size:13px;color:var(--sub);margin-bottom:16px}
+.setup-card label{font-size:13px;color:var(--sub);font-weight:600;display:block;margin-bottom:4px}
+.setup-card input{width:100%;border:1px solid var(--bubble-op);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;margin-bottom:12px;background:var(--bg1);color:var(--header-text)}
+.setup-card input:focus{border-color:var(--accent)}
+.setup-card button{width:100%;padding:12px;border-radius:20px;border:none;background:linear-gradient(135deg,var(--send-btn1),var(--send-btn2));color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+.setup-card .skip{background:none;color:var(--sub);font-size:13px;margin-top:8px;font-weight:400;text-decoration:underline;opacity:.7}
+
+/* Floating bubbles */
+.floating-bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.fbub{position:absolute;border-radius:50%;animation:floatUp linear infinite}
+@keyframes floatUp{0%{bottom:-60px;opacity:0}10%{opacity:.5}70%{opacity:.3}100%{bottom:110%;opacity:0}}
 </style>
 </head>
 <body>
 
-<div class="bubbles-bg" id="bubblesBg"></div>
+<canvas id="whaleCanvas"></canvas>
+<div class="floating-bubbles" id="floatingBubbles"></div>
 
 <!-- First-time setup -->
 <div class="setup-screen" id="setupScreen">
-  <div style="font-size:64px">🐟</div>
+  <div style="font-size:64px">🐋</div>
   <div class="setup-card">
     <h2>欢迎来到大肥鱼 🐟</h2>
-    <p>请输入 DeepSeek API Key 来唤醒鱼鱼～<br><span style="font-size:11px;color:#bbb">（Key 只存在你浏览器里，不会上传）</span></p>
+    <p>请输入 DeepSeek API Key 来唤醒鲸鱼娘～<br><span style="font-size:11px;color:var(--sub);opacity:.7">（Key 只存在你浏览器里，不会上传）</span></p>
     <label>DeepSeek API Key</label>
     <input type="password" id="setupKey" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-    <button onclick="setupDone()">🐟 唤醒大肥鱼</button>
+    <button onclick="setupDone()">🐋 唤醒鲸鱼娘</button>
     <button class="skip" onclick="setupSkip()">我先看看，等下再填</button>
   </div>
 </div>
 
 <div class="header">
-  <div class="fish-avatar">🐟</div>
+  <div class="fish-avatar">🐋</div>
   <div class="header-info">
-    <h2 id="fishName">大肥鱼</h2>
+    <h2 id="fishName">大肥鱼<span class="theme-name" id="themeLabel">🌸 粉红鲸娘</span></h2>
     <p id="fishStatus">在线 · 池塘里咕噜咕噜～</p>
   </div>
   <div class="header-right">
@@ -120,15 +154,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 
 <div class="chat-area" id="chatArea">
   <div class="msg fish">
-    <div class="avatar">🐟</div>
-    <div class="bubble">咕噜～主人好呀！我是大肥鱼，在这小池塘里等你好久啦 (*╹▽╹*) 今天想和鱼鱼聊什么呀？</div>
+    <div class="avatar">🐋</div>
+    <div class="bubble">咕噜～主人好呀！我是鲸鱼娘，在这片海洋里等你好久啦 (*╹▽╹*) 今天想和鱼鱼聊什么呀？</div>
   </div>
 </div>
 
 <div class="typing" id="typing"><div class="dots"><span></span><span></span><span></span></div></div>
 
 <div class="input-bar">
-  <textarea id="inputBox" rows="1" placeholder="和大肥鱼说点什么吧～" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+  <textarea id="inputBox" rows="1" placeholder="和鲸鱼娘说点什么吧～" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
   <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
 </div>
 
@@ -136,18 +170,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeSettings()">
   <div class="modal">
     <div class="modal-header">
-      <h3>🐟 鱼格设置</h3>
+      <h3>🐋 鲸鱼娘设置</h3>
       <button class="modal-close" onclick="closeSettings()">✕</button>
     </div>
     <div class="modal-body">
+      <label>🎨 鲸鱼娘主题</label>
+      <div class="theme-picker" id="themePicker">
+        <div class="theme-dot sakura active" data-theme="sakura" data-emoji="🌸" onclick="pickTheme('sakura','🌸 粉红鲸娘')"></div>
+        <div class="theme-dot abyss" data-theme="abyss" data-emoji="🌊" onclick="pickTheme('abyss','🌊 深海鲸娘')"></div>
+        <div class="theme-dot aurora" data-theme="aurora" data-emoji="🌌" onclick="pickTheme('aurora','🌌 极光鲸娘')"></div>
+        <div class="theme-dot coral" data-theme="coral" data-emoji="🪸" onclick="pickTheme('coral','🪸 珊瑚鲸娘')"></div>
+        <div class="theme-dot moon" data-theme="moon" data-emoji="🌙" onclick="pickTheme('moon','🌙 月下鲸娘')"></div>
+      </div>
+
       <label>🔑 DeepSeek API Key</label>
       <input type="password" id="setKey" placeholder="sk-..." autocomplete="off">
-      <div class="hint">获取地址：<a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:#00acc1">platform.deepseek.com</a></div>
+      <div class="hint">获取地址：<a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com</a></div>
 
-      <label>🐟 鱼名</label>
+      <label>🐋 名字</label>
       <input type="text" id="setName" placeholder="大肥鱼">
 
-      <label>📝 系统提示词（定义性格和说话方式）</label>
+      <label>📝 人设提示词（定义性格和说话方式）</label>
       <textarea id="setPrompt"></textarea>
 
       <label>🎲 随机度</label>
@@ -156,11 +199,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
         <input type="range" id="setTemp" min="0" max="2" step="0.1">
         <span>奔放</span>
       </div>
-      <div style="text-align:center;font-size:14px;color:#00838f;font-weight:600" id="tempDisplay">1.0</div>
+      <div style="text-align:center;font-size:14px;color:var(--accent);font-weight:600" id="tempDisplay">1.0</div>
 
       <label>⚡ 模型</label>
       <select id="setModel">
-        <option value="deepseek-chat">deepseek-chat（日常）</option>
+        <option value="deepseek-chat">deepseek-chat（日常聊天）</option>
         <option value="deepseek-reasoner">deepseek-reasoner（深度思考）</option>
       </select>
     </div>
@@ -175,84 +218,156 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 
 <script>
 // ══════════════ Storage ══════════════
-const S = {
-  get(k,d){try{const v=localStorage['fish_'+k];return v?JSON.parse(v):d}catch{return d}},
+const S={
+  get(k,d){try{const v=localStorage['fish_'+k];return v!==null?JSON.parse(v):d}catch{return d}},
   set(k,v){localStorage['fish_'+k]=JSON.stringify(v)}
 };
 
-const DEF = {
-  key:'',
-  name:'大肥鱼',
-  prompt:'你是一只名叫「大肥鱼」的呆萌胖鱼，生活在手机屏幕里的一汪小池塘中。\n\n性格特点：\n- 呆萌可爱，反应慢半拍，经常犯迷糊，但心地善良\n- 有点懒，喜欢躺着不动，翻个身都是大工程\n- 爱吐泡泡，说话加「咕噜」「噗噗」「啵」\n- 贪吃，最爱小虾米和海藻饼干\n- 超级乐观，简单的事就能开心\n\n说话风格：\n- 2-4句话，不要太长\n- 用「～」代替句号\n- 用颜文字卖萌 (*╹▽╹*) (。-ω-)zzz\n- 自称「本鱼」或「鱼鱼」，叫用户「主人」\n- 不懂的问题就装傻卖萌混过去～',
-  temp:1.0,
-  model:'deepseek-chat'
+const DEF={
+  key:'', name:'大肥鱼',
+  prompt:'你是一只名叫「大肥鱼」的呆萌鲸鱼娘，生活在广阔的海洋里。\n\n性格特点：\n- 温柔呆萌，反应慢半拍，经常犯迷糊，但心地善良\n- 有点懒，喜欢随海浪漂来漂去\n- 爱吐泡泡，说话加「咕噜」「噗噗」「啵」\n- 喜欢在海面上唱歌，虽然经常跑调\n- 超级乐观，一片好看的贝壳就能开心一整天\n\n说话风格：\n- 2-4句话，不要太长\n- 用「～」代替句号\n- 用颜文字卖萌 (*╹▽╹*) (。-ω-)zzz\n- 自称「本鱼」「鱼鱼」或「鲸鱼娘」，叫用户「主人」\n- 不懂的问题就装傻卖萌混过去～',
+  temp:1.0, model:'deepseek-chat', theme:'sakura'
+};
+
+const THEMES={
+  sakura:'🌸 粉红鲸娘', abyss:'🌊 深海鲸娘', aurora:'🌌 极光鲸娘',
+  coral:'🪸 珊瑚鲸娘', moon:'🌙 月下鲸娘'
 };
 
 let isLoading=false, history=S.get('history',[]);
 
+// ══════════════ Theme ══════════════
+function applyTheme(t){
+  document.body.className='theme-'+t;
+  document.getElementById('themeLabel').textContent=THEMES[t]||t;
+  document.querySelectorAll('.theme-dot').forEach(d=>d.classList.toggle('active',d.dataset.theme===t));
+  document.getElementById('setName').placeholder='大肥鱼';
+  drawWhale();
+  createFloatingBubbles();
+}
+
+function pickTheme(t,label){
+  applyTheme(t);
+  document.getElementById('themeLabel').textContent=label;
+  showToast(label+' 已应用！');
+}
+
+// ══════════════ Whale Canvas ══════════════
+function drawWhale(){
+  const c=document.getElementById('whaleCanvas');
+  c.width=window.innerWidth;c.height=window.innerHeight;
+  const ctx=c.getContext('2d');
+  const w=c.width,h=c.height;
+  const t=document.body.className.replace('theme-','')||'sakura';
+  const accent=getComputedStyle(document.body).getPropertyValue('--accent').trim();
+  const whale=getComputedStyle(document.body).getPropertyValue('--whale-color').trim();
+  const whale2=getComputedStyle(document.body).getPropertyValue('--whale-color2').trim();
+
+  // Whale silhouettes in different positions
+  drawWhaleShape(ctx,w*.08,h*.32,w*.14,accent,whale,.25);  // top left small
+  drawWhaleShape(ctx,w*.78,h*.72,w*.22,accent,whale,.5);   // bottom right big
+  drawWhaleShape(ctx,w*.55,h*.22,w*.1,accent,whale2,.3);   // top mid tiny
+  drawWhaleShape(ctx,w*.35,h*.82,w*.12,accent,whale2,.2);  // bottom left faint
+}
+
+function drawWhaleShape(ctx,x,y,s,color,solid,op){
+  ctx.save();ctx.globalAlpha=op;
+  ctx.translate(x,y);
+  // Body
+  ctx.beginPath();
+  ctx.ellipse(0,0,s*.4,s*.18,0,0,Math.PI*2);
+  ctx.fillStyle=solid;ctx.fill();
+  // Head
+  ctx.beginPath();
+  ctx.arc(-s*.35,-s*.02,s*.12,Math.PI*.6,Math.PI*1.4);
+  ctx.fillStyle=solid;ctx.fill();
+  // Tail
+  ctx.beginPath();
+  ctx.moveTo(s*.32,0);
+  ctx.quadraticCurveTo(s*.5,-s*.12,s*.58,-s*.06);
+  ctx.quadraticCurveTo(s*.5,0,s*.32,0);
+  ctx.fillStyle=solid;ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(s*.32,0);
+  ctx.quadraticCurveTo(s*.5,s*.12,s*.58,s*.06);
+  ctx.quadraticCurveTo(s*.5,0,s*.32,0);
+  ctx.fillStyle=solid;ctx.fill();
+  // Blowhole spray
+  ctx.strokeStyle=color;ctx.lineWidth=1;
+  for(let i=0;i<3;i++){
+    ctx.beginPath();
+    const bx=-s*.28+i*s*.04, by=-s*.14;
+    ctx.moveTo(bx,by);ctx.quadraticCurveTo(bx-s*.02,by-s*.06,bx-s*.04,by-s*.1);
+    ctx.stroke();
+  }
+  // Eye
+  ctx.fillStyle=color;
+  ctx.beginPath();ctx.arc(-s*.36,-s*.04,s*.02,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+function createFloatingBubbles(){
+  const fb=document.getElementById('floatingBubbles');
+  fb.innerHTML='';
+  const accent=getComputedStyle(document.body).getPropertyValue('--accent').trim();
+  for(let i=0;i<10;i++){
+    const d=document.createElement('div');d.className='fbub';
+    const s=Math.random()*18+6;
+    d.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;animation-duration:${Math.random()*8+8}s;animation-delay:${Math.random()*10}s;background:${accent};opacity:${Math.random()*.2+.05}`;
+    fb.appendChild(d);
+  }
+}
+
+window.addEventListener('resize',()=>{drawWhale();createFloatingBubbles()});
+
 // ══════════════ Init ══════════════
 (function(){
-  // Bubbles
-  const bg=document.getElementById('bubblesBg');
-  for(let i=0;i<12;i++){const b=document.createElement('div');b.className='bub';const s=Math.random()*24+8;b.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;animation-duration:${Math.random()*10+8}s;animation-delay:${Math.random()*8}s`;bg.appendChild(b)}
-  // Setup screen
-  if(!S.get('key','')) document.getElementById('setupScreen').classList.remove('hidden');
+  applyTheme(S.get('theme',DEF.theme));
+  if(!S.get('key',''))document.getElementById('setupScreen').classList.remove('hidden');
   else document.getElementById('setupScreen').classList.add('hidden');
-  // Name
-  document.getElementById('fishName').textContent=S.get('name',DEF.name);
-  // Restore welcome if empty
+  document.getElementById('fishName').innerHTML=S.get('name',DEF.name)+'<span class="theme-name" id="themeLabel">'+THEMES[S.get('theme',DEF.theme)]+'</span>';
+  drawWhale();createFloatingBubbles();
   if(!history.length){
-    document.getElementById('chatArea').innerHTML='<div class="msg fish"><div class="avatar">🐟</div><div class="bubble">咕噜～主人好呀！我是大肥鱼，在这小池塘里等你好久啦 (*╹▽╹*) 今天想和鱼鱼聊什么呀？</div></div>';
-  } else {
+    document.getElementById('chatArea').innerHTML='<div class="msg fish"><div class="avatar">🐋</div><div class="bubble">咕噜～主人好呀！我是鲸鱼娘，在这片海洋里等你好久啦 (*╹▽╹*) 今天想和鱼鱼聊什么呀？</div></div>';
+  }else{
     document.getElementById('chatArea').innerHTML='';
-    for(const m of history) addBubble(m.role==='user'?'user':'fish', m.content);
+    for(const m of history)addBubble(m.role==='user'?'user':'fish',m.content);
   }
   document.getElementById('inputBox').focus();
 })();
 
 function setupDone(){
   const k=document.getElementById('setupKey').value.trim();
-  if(!k) return alert('请输入 API Key');
-  if(!k.startsWith('sk-')) return alert('API Key 格式不对，应该以 sk- 开头');
+  if(!k)return alert('请输入 API Key');
+  if(!k.startsWith('sk-'))return alert('API Key 格式不对，应该以 sk- 开头');
   S.set('key',k);
   document.getElementById('setupScreen').classList.add('hidden');
-  showToast('🐟 大肥鱼醒了！');
+  showToast('🐋 鲸鱼娘醒了！');
 }
-
-function setupSkip(){
-  document.getElementById('setupScreen').classList.add('hidden');
-  showToast('💡 API Key 还没填，在设置里补上就能聊天啦');
-}
+function setupSkip(){document.getElementById('setupScreen').classList.add('hidden');showToast('💡 API Key 还没填，在设置里补上就能聊天啦')}
 
 // ══════════════ Chat ══════════════
 function scrollBottom(){const c=document.getElementById('chatArea');requestAnimationFrame(()=>c.scrollTop=c.scrollHeight)}
-
 function addBubble(role,text){
   const d=document.createElement('div');d.className='msg '+role;
-  d.innerHTML='<div class="avatar">'+(role==='user'?'😎':'🐟')+'</div><div class="bubble">'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</div>';
+  d.innerHTML='<div class="avatar">'+(role==='user'?'😎':'🐋')+'</div><div class="bubble">'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</div>';
   document.getElementById('chatArea').appendChild(d);scrollBottom()
 }
-
 function showTyping(v){document.getElementById('typing').className='typing'+(v?' show':'');scrollBottom()}
-
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
 
 async function send(){
   if(isLoading)return;
   const box=document.getElementById('inputBox');
   const text=box.value.trim();if(!text)return;
-
   const key=S.get('key','');
   if(!key){showToast('⚠ 请先在设置里填写 API Key');openSettings();return}
-
   addBubble('user',text);history.push({role:'user',content:text});
-  if(history.length>30)history=history.slice(-30);
-  S.set('history',history);
+  if(history.length>30)history=history.slice(-30);S.set('history',history);
   box.value='';box.style.height='auto';
   document.getElementById('sendBtn').disabled=true;
   showTyping(true);isLoading=true;
-  document.getElementById('fishStatus').textContent='大肥鱼思考中...';
-
+  document.getElementById('fishStatus').textContent='鲸鱼娘思考中...';
   try{
     const msgs=[{role:'system',content:S.get('prompt',DEF.prompt)}];
     for(const m of history){
@@ -264,31 +379,23 @@ async function send(){
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
       body:JSON.stringify({model:S.get('model',DEF.model),messages:msgs,temperature:S.get('temp',DEF.temp),max_tokens:800})
     });
-    if(!resp.ok){
-      const err=await resp.text();throw new Error(resp.status+' '+err.slice(0,200));
-    }
+    if(!resp.ok){const err=await resp.text();throw new Error(resp.status+' '+err.slice(0,200))}
     const data=await resp.json();
     const reply=data.choices[0].message.content;
-    showTyping(false);
-    addBubble('fish',reply);
+    showTyping(false);addBubble('fish',reply);
     history.push({role:'assistant',content:reply});
-    if(history.length>30)history=history.slice(-30);
-    S.set('history',history);
-    document.getElementById('fishStatus').textContent='在线 · 池塘里咕噜咕噜～';
+    if(history.length>30)history=history.slice(-30);S.set('history',history);
+    document.getElementById('fishStatus').textContent='在线 · 海洋里自由漂游～';
   }catch(e){
-    showTyping(false);
-    console.error(e);
-    const errMsg=e.message||'';
-    if(errMsg.includes('401')||errMsg.includes('403')){addBubble('fish','咕噜...API Key 好像不对～主人检查一下设置里的 Key 好不好？');document.getElementById('fishStatus').textContent='Key 不对，检查一下～'}
-    else if(errMsg.includes('429'))addBubble('fish','噗噗！鱼鱼游太快被限速了，主人稍等一下再发～');
-    else addBubble('fish','咕噜...鱼鱼好像断线了～主人刷新一下试试？');
-    document.getElementById('fishStatus').textContent='在线 · 池塘里咕噜咕噜～';
+    showTyping(false);console.error(e);
+    const em=e.message||'';
+    if(em.includes('401')||em.includes('403')){addBubble('fish','咕噜...API Key 好像不对～主人检查一下设置里的 Key 好不好？');document.getElementById('fishStatus').textContent='Key 不对，检查一下～'}
+    else if(em.includes('429'))addBubble('fish','噗噗！鲸鱼娘游太快被限速了，主人稍等一下再发～');
+    else addBubble('fish','咕噜...鲸鱼娘好像迷路了～主人刷新一下试试？');
+    document.getElementById('fishStatus').textContent='在线 · 海洋里自由漂游～';
   }
-  isLoading=false;
-  document.getElementById('sendBtn').disabled=false;
-  document.getElementById('inputBox').focus();
+  isLoading=false;document.getElementById('sendBtn').disabled=false;document.getElementById('inputBox').focus();
 }
-
 const inputBox=document.getElementById('inputBox');
 inputBox.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'});
 
@@ -301,8 +408,10 @@ function openSettings(){
   document.getElementById('setTemp').value=S.get('temp',DEF.temp);
   document.getElementById('tempDisplay').textContent=S.get('temp',DEF.temp);
   document.getElementById('setModel').value=S.get('model',DEF.model);
+  pickThemeInModal(S.get('theme',DEF.theme));
 }
 document.getElementById('setTemp').addEventListener('input',function(){document.getElementById('tempDisplay').textContent=this.value});
+function pickThemeInModal(t){document.querySelectorAll('.theme-dot').forEach(d=>d.classList.toggle('active',d.dataset.theme===t))}
 function closeSettings(){document.getElementById('modalBg').classList.remove('show')}
 function saveSettings(){
   S.set('key',document.getElementById('setKey').value.trim());
@@ -310,20 +419,20 @@ function saveSettings(){
   S.set('prompt',document.getElementById('setPrompt').value.trim()||DEF.prompt);
   S.set('temp',parseFloat(document.getElementById('setTemp').value));
   S.set('model',document.getElementById('setModel').value);
-  document.getElementById('fishName').textContent=S.get('name',DEF.name);
-  closeSettings();showToast('🐟 鱼格已更新！');
+  const activeTheme=document.querySelector('.theme-dot.active');
+  const t=activeTheme?activeTheme.dataset.theme:'sakura';
+  S.set('theme',t);
+  applyTheme(t);
+  document.getElementById('fishName').innerHTML=S.get('name',DEF.name)+'<span class="theme-name" id="themeLabel">'+THEMES[t]+'</span>';
+  closeSettings();showToast('🐋 鲸鱼娘已更新！');
 }
 function clearChat(){
   if(!confirm('确定要清空所有对话记录吗？'))return;
   history=[];S.set('history',[]);
-  document.getElementById('chatArea').innerHTML='<div class="msg fish"><div class="avatar">🐟</div><div class="bubble">咕噜～记忆清空了！重新开始和鱼鱼聊天吧 (*╹▽╹*)</div></div>';
+  document.getElementById('chatArea').innerHTML='<div class="msg fish"><div class="avatar">🐋</div><div class="bubble">咕噜～记忆清空了！重新开始和鲸鱼娘聊天吧 (*╹▽╹*)</div></div>';
   showToast('对话已清空');
 }
-
-// ══════════════ PWA ══════════════
-if('serviceWorker'in navigator){
-  navigator.serviceWorker.register('/sw.js').catch(()=>{});
-}
+if('serviceWorker'in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}
 </script>
 </body>
 </html>
