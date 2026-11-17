@@ -165,6 +165,7 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
   <div class="setup-card">
     <h2>大肥鱼</h2>
     <p>填入 DeepSeek API Key 就能开始聊天～<br>Key 只保存在本机浏览器，不会上传任何服务器。</p>
+    <p style="font-size:12px;color:#6b6b6b;line-height:1.5;margin-bottom:12px;padding:8px 10px;background:#eaf4ff;border-radius:8px">💡 <b>添加到桌面</b>：聊天界面顶部会出现安装提示，或者进聊天后点 ⋯ 设置 → 添加到桌面，之后就像 App 一样打开啦</p>
     <input type="password" id="setupKey" placeholder="sk-xxxxxxxxxxxxxxxx" autocomplete="off">
     <button onclick="setupDone()">进入聊天</button>
     <button class="skip" onclick="setupSkip()">先去逛逛，稍后再填</button>
@@ -571,28 +572,53 @@ function setupSkip(){
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}
 
 /* ═════════ PWA install ═════════ */
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+const isStandalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+
 let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();deferredPrompt=e;
   const bar=document.getElementById('installBar');
-  if(bar&&!S.get('install_dismissed',false))bar.classList.add('show');
+  const btn=document.getElementById('installBtn');
+  if(bar&&btn){bar.classList.add('show');btn.textContent='安装';btn.onclick=installApp}
 });
+
+/* always show banner after delay (unless installed) */
+function showInstallBar(){
+  if(isStandalone)return;
+  if(S.get('install_dismissed'))return;
+  const bar=document.getElementById('installBar');
+  const btn=document.getElementById('installBtn');
+  if(!bar)return;
+  if(isIOS){
+    bar.querySelector('.ib-text').innerHTML='<b>🏠 添加到主屏幕</b><br>点 Safari 底部 📤 分享 → 添加到主屏幕';
+    btn.textContent='看教程';btn.onclick=()=>document.getElementById('iosGuide').classList.add('show');
+  }else{
+    bar.querySelector('.ib-text').innerHTML=deferredPrompt?'<b>🐟 添加到桌面</b><br>像原生 App 一样快速打开':'<b>🐟 添加到桌面</b><br>点 Chrome 菜单 → 添加到主屏幕';
+    btn.textContent=deferredPrompt?'安装':'怎么做';
+    btn.onclick=deferredPrompt?installApp:()=>showToast('点 Chrome 右上角 ⋮ → 添加到主屏幕');
+  }
+  bar.classList.add('show');
+}
+if(!isStandalone)setTimeout(showInstallBar,1500);
+
 function installApp(){
-  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{
-    if(r.outcome==='accepted'){document.getElementById('installBar').classList.remove('show');showToast('正在安装到桌面～')}
-    else showToast('下次想安装时点 ⋯ 设置哦');
-  });deferredPrompt=null}else showToast('请在 Chrome 菜单中选择「添加到主屏幕」')
+  if(!deferredPrompt){showToast('点 Chrome 右上角 ⋮ → 添加到主屏幕');return}
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted'){document.getElementById('installBar').classList.remove('show');showToast('安装成功～')}
+    else showToast('下次想安装时点 ⋯ 设置哦')
+  });
+  deferredPrompt=null;
 }
 function dismissInstall(){
   document.getElementById('installBar').classList.remove('show');
   S.set('install_dismissed',true);
 }
 
-/* iOS detection */
-const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
-const isStandalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
-if(isIOS&&!isStandalone&&!S.get('ios_guide_shown',false)){
-  setTimeout(()=>{document.getElementById('iosGuide').classList.add('show');S.set('ios_guide_shown',true)},2000);
+/* iOS guide */
+if(isIOS&&!isStandalone){
+  setTimeout(()=>{document.getElementById('iosGuide').classList.add('show')},2500);
 }
 </script>
 </body>
