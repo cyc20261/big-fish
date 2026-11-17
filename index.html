@@ -175,10 +175,8 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
   <div class="setup-card">
     <h2>大肥鱼</h2>
     <p>填入 DeepSeek API Key 就能开始聊天～<br>Key 只保存在本机浏览器，不会上传任何服务器。</p>
-    <div id="browserWarn" style="display:none;padding:10px 12px;margin-bottom:12px;background:#fff3e0;border-radius:8px;font-size:12px;color:#e65100;line-height:1.5">
-      ⚠️ 当前浏览器不支持安装到桌面<br>请<u onclick="copyUrl()" style="cursor:pointer">复制链接</u>后在 <b>Chrome</b> 或 <b>Safari</b> 中打开
-    </div>
-    <p style="font-size:12px;color:#6b6b6b;line-height:1.5;margin-bottom:12px;padding:8px 10px;background:#eaf4ff;border-radius:8px">💡 用 <b>Chrome</b> 打开 → 右下角 📲 一键装到桌面<br>用 <b>Safari</b> 打开 → 分享 → 添加到主屏幕</p>
+    <div id="browserWarn" style="display:none;padding:10px 12px;margin-bottom:12px;background:#fff3e0;border-radius:8px;font-size:12px;color:#e65100;line-height:1.5;text-align:left"></div>
+    <p style="font-size:12px;color:#6b6b6b;line-height:1.5;margin-bottom:12px;padding:8px 10px;background:#eaf4ff;border-radius:8px;text-align:left">💡 <span id="installTipText">点右下角 📲 一键安装到桌面</span></p>
     <input type="password" id="setupKey" placeholder="sk-xxxxxxxxxxxxxxxx" autocomplete="off">
     <button onclick="setupDone()">进入聊天</button>
     <button class="skip" onclick="setupSkip()">先去逛逛，稍后再填</button>
@@ -594,25 +592,58 @@ if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catc
 const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 const isStandalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
 
-/* detect browsers that don't support PWA install */
-(function(){
+/* browser detective */
+function detectBrowser(){
   const ua=navigator.userAgent||'';
-  const isBaidu=/baiduboxapp|baidubrowser/i.test(ua);
-  const isQQ=/QQ\//i.test(ua)&&!/Chrome/i.test(ua);
-  const isWeChat=/MicroMessenger/i.test(ua);
-  const isUC=/UCBrowser/i.test(ua);
-  const bad=isBaidu||isQQ||isWeChat||isUC;
-  if(bad&&!isStandalone){
-    const w=document.getElementById('browserWarn');
-    if(w)w.style.display='block';
-  }
-})();
-function copyUrl(){
-  if(navigator.clipboard){navigator.clipboard.writeText(location.href).then(()=>showToast('链接已复制～去 Chrome 粘贴打开'));return}
-  const ta=document.createElement('textarea');ta.value=location.href;ta.style.position='fixed';ta.style.left='-9999px';
-  document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
-  showToast('链接已复制～去 Chrome 粘贴打开');
+  if(/EdgA?\//i.test(ua))return'edge';
+  if(/Firefox/i.test(ua)&&!/Seamonkey/i.test(ua))return'firefox';
+  if(/HBrowser/i.test(ua)||/Huawei/i.test(ua))return'huawei';
+  if(/MiuiBrowser/i.test(ua))return'xiaomi';
+  if(/OppoBrowser/i.test(ua)||/HeyTapBrowser/i.test(ua))return'oppo';
+  if(/VivoBrowser/i.test(ua))return'vivo';
+  if(/baiduboxapp|baidubrowser/i.test(ua))return'baidu';
+  if(/QQ\//i.test(ua)&&!/Chrome/i.test(ua))return'qq';
+  if(/MicroMessenger/i.test(ua))return'wechat';
+  if(/UCBrowser/i.test(ua))return'uc';
+  if(/Chrome/i.test(ua))return'chrome';
+  if(/Safari/i.test(ua)&&!isIOS)return'safari_mac';
+  return'other';
 }
+const BROWSER=detectBrowser();
+const PWA_OK=(BROWSER==='chrome'||BROWSER==='edge'||BROWSER==='firefox'||BROWSER==='samsung'||isIOS);
+const BROWSER_TIPS={
+  chrome:   '点右下角📲一键安装',
+  edge:     '点右下角📲一键安装',
+  firefox:  '点菜单 → 安装',
+  huawei:   '点菜单 → 添加到桌面',
+  xiaomi:   '点菜单 → 添加快捷方式到桌面',
+  oppo:     '点菜单 → 添加到桌面',
+  vivo:     '点菜单 → 添加到桌面',
+  baidu:    '请换 Chrome / Edge / 华为浏览器打开',
+  qq:       '请换 Chrome / Edge / 华为浏览器打开',
+  wechat:   '请换 Chrome / Edge / 华为浏览器打开',
+  uc:       '请换 Chrome / Edge / 华为浏览器打开',
+  other:    '点菜单 → 添加到桌面 / 添加快捷方式'
+};
+function setupBrowserWarn(){
+  const w=document.getElementById('browserWarn');
+  const t=document.getElementById('installTipText');
+  if(!w||!t)return;
+  if(isStandalone)return;
+  if(!PWA_OK){
+    w.style.display='block';
+    w.textContent='⚠️ 当前浏览器不支持一键安装。推荐安装 Microsoft Edge（支持 PWA）后重新打开。';
+  }
+  t.textContent=BROWSER_TIPS[BROWSER]||BROWSER_TIPS.other;
+}
+function copyUrl(){
+  const url=location.href;
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(()=>showToast('链接已复制～去 Edge 粘贴打开'));return}
+  const ta=document.createElement('textarea');ta.value=url;ta.style.position='fixed';ta.style.left='-9999px';
+  document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  showToast('链接已复制～去 Edge 粘贴打开');
+}
+setupBrowserWarn();
 
 let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{
