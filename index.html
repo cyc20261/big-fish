@@ -150,6 +150,16 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
 .ios-guide .ios-card .ios-steps .ios-arr{font-size:16px;color:#aaa}
 .ios-guide .ios-card button{width:100%;padding:11px;border:none;border-radius:10px;background:linear-gradient(180deg,#4da3ff,#2b7fff);color:#fff;font-size:15px;font-weight:600;cursor:pointer}
 
+/* floating install button */
+.inst-fab{position:fixed;bottom:80px;right:16px;z-index:50;width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(135deg,#4da3ff,#1565c0);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 4px 16px rgba(21,101,192,.45);border:none;
+  opacity:0;transform:scale(0);transition:opacity .3s,transform .3s cubic-bezier(.4,0,.2,1)}
+.inst-fab.show{opacity:1;transform:scale(1)}
+.inst-fab:active{transform:scale(.9)}
+.inst-fab .fab-label{position:absolute;right:60px;background:rgba(0,0,0,.78);color:#fff;font-size:12px;padding:5px 10px;border-radius:14px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}
+.inst-fab.show .fab-label{opacity:1}
+
 .bubbles-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .fbub{position:absolute;border-radius:50%;animation:floatUp linear infinite}
 @keyframes floatUp{0%{bottom:-40px;opacity:0}12%{opacity:.3}70%{opacity:.12}100%{bottom:110%;opacity:0}}
@@ -206,6 +216,12 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
 
 <div class="toast" id="toast"></div>
 
+<!-- floating install FAB -->
+<button class="inst-fab" id="instFab" onclick="doInstall()">
+  📲
+  <span class="fab-label"></span>
+</button>
+
 <!-- install bar (Android) -->
 <div class="install-bar" id="installBar">
   <div class="ib-text"><b>🐟 添加到桌面</b><br>像原生 App 一样快速打开</div>
@@ -251,7 +267,7 @@ body::before{content:'';position:fixed;inset:0;background:rgba(242,247,253,.34);
 
       <label>添加到桌面</label>
       <div style="display:flex;gap:8px" id="installRow">
-        <button id="sheetInstallBtn" onclick="installApp()" style="flex:1;padding:9px;border:none;border-radius:8px;background:#4da3ff;color:#fff;font-size:13px;font-weight:600;cursor:pointer">安装到桌面 (Android)</button>
+        <button id="sheetInstallBtn" onclick="doInstall()" style="flex:1;padding:9px;border:none;border-radius:8px;background:#4da3ff;color:#fff;font-size:13px;font-weight:600;cursor:pointer">安装到桌面 (Android)</button>
         <button onclick="document.getElementById('iosGuide').classList.add('show')" style="flex:1;padding:9px;border:none;border-radius:8px;background:#ececec;color:#555;font-size:13px;font-weight:600;cursor:pointer">iPhone 查看教程</button>
       </div>
       <div class="tip" id="installTip">添加后像原生 App 一样快速打开</div>
@@ -578,12 +594,47 @@ const isStandalone=window.matchMedia('(display-mode: standalone)').matches||navi
 let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();deferredPrompt=e;
+  showFab('install');
   const bar=document.getElementById('installBar');
   const btn=document.getElementById('installBtn');
-  if(bar&&btn){bar.classList.add('show');btn.textContent='安装';btn.onclick=installApp}
+  if(bar&&btn){bar.classList.add('show');btn.textContent='安装';btn.onclick=doInstall}
 });
 
-/* always show banner after delay (unless installed) */
+/* ── floating install button ── */
+function showFab(mode){
+  if(isStandalone)return;
+  if(S.get('fab_dismissed'))return;
+  const fab=document.getElementById('instFab');
+  const lbl=fab.querySelector('.fab-label');
+  if(!fab)return;
+  if(mode==='install'||deferredPrompt){
+    fab.textContent='📲';lbl.textContent='一键安装到桌面';
+  }else if(isIOS){
+    fab.textContent='📱';lbl.textContent='添加到主屏幕';
+  }else{
+    fab.textContent='📲';lbl.textContent='添加到桌面';
+  }
+  fab.classList.add('show');
+  setTimeout(()=>{if(!S.get('fab_dismissed'))fab.classList.remove('show')},15000);
+}
+function doInstall(){
+  if(isIOS){document.getElementById('iosGuide').classList.add('show');return}
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(r=>{
+      S.set('fab_dismissed',true);
+      document.getElementById('instFab').classList.remove('show');
+      if(r.outcome==='accepted')showToast('安装成功～');
+    });
+    deferredPrompt=null;return;
+  }
+  showToast('点 Chrome 右上角 ⋮ → 添加到主屏幕');
+}
+document.getElementById('instFab').addEventListener('transitionend',function(){
+  if(!this.classList.contains('show')){this.textContent='📲';this.querySelector('.fab-label').textContent=''}
+});
+
+/* always show banner after delay */
 function showInstallBar(){
   if(isStandalone)return;
   if(S.get('install_dismissed'))return;
@@ -596,21 +647,12 @@ function showInstallBar(){
   }else{
     bar.querySelector('.ib-text').innerHTML=deferredPrompt?'<b>🐟 添加到桌面</b><br>像原生 App 一样快速打开':'<b>🐟 添加到桌面</b><br>点 Chrome 菜单 → 添加到主屏幕';
     btn.textContent=deferredPrompt?'安装':'怎么做';
-    btn.onclick=deferredPrompt?installApp:()=>showToast('点 Chrome 右上角 ⋮ → 添加到主屏幕');
+    btn.onclick=deferredPrompt?doInstall:()=>showToast('点 Chrome 右上角 ⋮ → 添加到主屏幕');
   }
   bar.classList.add('show');
 }
-if(!isStandalone)setTimeout(showInstallBar,1500);
+if(!isStandalone){setTimeout(showInstallBar,1500);setTimeout(()=>showFab(deferredPrompt?'install':'manual'),3000)}
 
-function installApp(){
-  if(!deferredPrompt){showToast('点 Chrome 右上角 ⋮ → 添加到主屏幕');return}
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(r=>{
-    if(r.outcome==='accepted'){document.getElementById('installBar').classList.remove('show');showToast('安装成功～')}
-    else showToast('下次想安装时点 ⋯ 设置哦')
-  });
-  deferredPrompt=null;
-}
 function dismissInstall(){
   document.getElementById('installBar').classList.remove('show');
   S.set('install_dismissed',true);
